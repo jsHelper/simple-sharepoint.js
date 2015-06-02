@@ -17,3 +17,18 @@ $sspjs.run(function($sp, $logger){
   });
 });
 ```
+### The `.run(func)` Method
+By calling the `.run(func)` method a context will be created to ensure the accessability to the SharePoint JavaScript Context.
+The inner `func` will be called after `.ready()` and after the `SP.js` have been loaded. The function parameters will be incjected by name, means you can call it with `.run(function($sp, $cache, $logger){ /* do something with $sp, $cache, $logger ... */ });` but also in another order `.run(function($cache, $sp, $logger){ /* do something with $sp, $cache, $logger ... */ });`
+
+#### `$sp`
+Provides the base SharePoint access methods. Every method with the suffix 'Async' returns [a promise](https://api.jquery.com/deferred.promise/)
+
+#### `$resources`
+tbd.
+#### `$logger`
+tbd.
+#### `$cache`
+tbd.
+#### `$config`
+tbd.
