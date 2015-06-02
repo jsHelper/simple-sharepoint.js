@@ -5,9 +5,6 @@
         SharePoint JS   >= 15 (SharePoint 2013)
         Browser         > IE9
 
-    Developers:         
-        Martin Rommel
-
     Notes and Warrenty:
         This is a small library access SharePoint in a very easy way. There is 
         only base functionality implemented. Please do not copy without credit the
