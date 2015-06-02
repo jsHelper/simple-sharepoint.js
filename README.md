@@ -159,8 +159,35 @@ $sspjs.run(function($resources, $sp){
 ```
 
 #### `$logger`
-tbd.
+This object provides a simple log method. Messages will be logged to the browsers' default console. If the browser does not have a console nothing will be logged.
+```javascript
+$sspjs.run(function($logger){
+  // $logger.log([message])
+  $logger.log('Hi this is my new log message');
+});
+```
 #### `$cache`
-tbd.
+The cache object provides a mechnism to store strings or objects to the browser cache. The [sessionStorage](https://developer.mozilla.org/de/docs/Web/API/Window/sessionStorage) will be used by default. If your browser does not support the sessionStorage all values will be stored as cookies.
+```javascript
+$sspjs.run(function($cache){
+  // $cache.set([access key], [value])
+  $cache.set('FIRST_VALUE_KEY','Value to store');
+  // $cache.get([access key])
+  var value = $cache.get('FIRST_VALUE_KEY');
+  // returns 'Value to store'
+});
+```
 #### `$config`
-tbd.
+The config object provides different configuration flags and attributes.
+```javascript
+$sspjs.run(function($config){
+  $config.doCache = true;     // default: true
+  $config.cacheExpires = 5;   // default: 5 minutes
+  $config.doLogging = false;  // default: false
+  
+  // SharePoint configuration value (READONLY)
+  imagesPath: '',             // returns the relative URL to '_layouts/images/'
+  language: 'en-US',          // language of the sitetemplate (used by $resources)
+  languageUI: 'en-US'         // language set by the browsers local
+});
+```
