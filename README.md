@@ -35,6 +35,42 @@ $sspjs.run(function($cache, $sp, $logger){
 #### `$sp`
 Provides the base SharePoint access methods. Every method with the suffix 'Async' returns [a promise](https://api.jquery.com/deferred.promise/)
 
+##### Get List Fields
+```javascript
+$sspjs.run(function($sp){ 
+  $sp.getListFieldsAsync('Tasks').done(function(fields){
+    /*  returns all visible fields from the List called 'Tasks' */
+    
+    var internalName = fields[0].internalName;
+    var title = fields[0].title;
+    var type = fields[0].type; // SP.FieldType enumeration number
+  });
+});
+```
+If you have a Taxonomy Field the `.type` attribute will be `1000`.
+
+##### Get List Items
+```javascript
+$sspjs.run(function($sp){ 
+  $sp.getListItemsAsync('Tasks').done(function(items){
+    /* returns all list items from the List called 'Tasks' */
+  });
+});
+```
+Request additional fields
+```javascript
+$sspjs.run(function($sp){ 
+  $sp.getListItemsAsync('Tasks').done(function(items){
+    /* returns all list items from the List called 'Tasks' */
+  });
+});
+```
+##### Get List Item by Id
+##### Create List Item
+##### Update List Item
+##### Delete List Item by Id
+
+
 #### `$resources`
 tbd.
 #### `$logger`
