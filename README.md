@@ -1,8 +1,11 @@
 # sspjs (Simple SharePoint with JavaScript) #
 JavaScript Library to access SharePoint (2013 and above) data in a very easy way.
 
+## Overview ###
+In this documentation you can read how to read lists, get, create, edit and delete items from SharePoint lists. This library provides very simple and base function with no use of professional knowledge of the [SharePoint jsom (JavaScript Object Model)](https://msdn.microsoft.com/en-us/library/office/jj246996.aspx)
+
 ### Preconditions
-jQuery (> 1.0), SharePoint (> 2013)
+jQuery (>= 1.0), SharePoint (>= 2013)
 ### Example
 ```javascript
 $sspjs.run(function($sp, $logger){
@@ -139,7 +142,22 @@ $sspjs.run(function($sp){
 });
 ```
 #### `$resources`
-tbd.
+There is also a basic implementation of a resource manager. This resources manager has been implemented to suppert
+localization of SharePoint list names. If you create a site collection or site in another language SharePoint spells your lists depending on this language. For example the default 'Tasks' list will be 'Aufgaben' if German will be selected.
+```javascript
+$sspjs.run(function($resources, $sp){ 
+  // first you have to fill the resource manager with the localized strings
+  // $resources.add([language code], [access key], [localized string])
+  $resources.add('de-DE', 'LISTNAME', 'Aufgaben');
+  $resources.add('en-US', 'LISTNAME', 'Tasks');
+  
+  // now you can use the localized string everywhere in your .run-Context
+  // $resources.getText([access key], optional:[language code = default site language])
+  var listname = $resources.getText('LISTNAME');
+  var listnameInGerman = $resources.getText('LISTNAME', 'de-DE');
+});
+```
+
 #### `$logger`
 tbd.
 #### `$cache`
