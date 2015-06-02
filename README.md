@@ -35,11 +35,11 @@ $sspjs.run(function($cache, $sp, $logger){
 #### `$sp`
 Provides the base SharePoint access methods. Every method with the suffix 'Async' returns [a promise](https://api.jquery.com/deferred.promise/)
 
-##### Get List Fields
+##### Get Fields
 ```javascript
 $sspjs.run(function($sp){ 
   $sp.getListFieldsAsync('Tasks').done(function(fields){
-    /*  returns all visible fields from the List called 'Tasks' */
+    /*  returns all visible fields from the list called 'Tasks' */
     
     var internalName = fields[0].internalName;
     var title = fields[0].title;
@@ -49,22 +49,22 @@ $sspjs.run(function($sp){
 ```
 If you have a Taxonomy Field the `.type` attribute will be `1000`.
 
-##### Get List Items
+##### Get Items
 ```javascript
 $sspjs.run(function($sp){ 
   $sp.getListItemsAsync('Tasks').done(function(items){
-    /* returns all list items from the List called 'Tasks' */
+    /* returns all list items from the list called 'Tasks' */
   });
   
   // f.e. data of the first item
   var id = items[0].get_id();
 });
 ```
-Request additional fields
+###### Additional fields
 ```javascript
 $sspjs.run(function($sp){ 
   $sp.getListItemsAsync('Tasks', ['Title', 'Description']).done(function(items){
-    /* returns all list items from the List called 'Tasks' */
+    /* returns all list items from the list called 'Tasks' */
     
     // f.e. data of the first item
     var id = items[0].get_id();
@@ -73,33 +73,71 @@ $sspjs.run(function($sp){
   });
 });
 ```
-Request with a view XML
+###### View XML
 ```javascript
 $sspjs.run(function($sp){ 
   var viewXML = '<View><Query><OrderBy><FieldRef Name="Modified" Ascending="FALSE"/></OrderBy></Query></View>';
   $sp.getListItemsAsync('Tasks', ['Title', 'Description'], viewXML).done(function(items){
-    /* returns all list items from the List called 'Tasks' ordered by Modified date */
+    /* returns all list items from the list called 'Tasks' ordered by Modified date */
   });
 });
 ```
-Limit the result
+###### Limit the results
 ```javascript
 $sspjs.run(function($sp){ 
   $sp.getListItemsAsync('Tasks', ['Title', 'Description'], null, 2).done(function(items){
     /* 
-      returns all list items from the List called 'Tasks' limited by 2.
+      returns all list items from the list called 'Tasks' limited by 2.
       Be careful: This option only works if you do not provide a viewXML. If you do need a viewXML you can limit 
       your result by adding a rowlimit node to the view XML.
     */
   });
 });
 ```
-##### Get List Item by Id
-##### Create List Item
-##### Update List Item
-##### Delete List Item by Id
-
-
+##### Get Item by Id
+```javascript
+$sspjs.run(function($sp){ 
+  $sp.getListItemByIdAsync('Tasks', 1).done(function(item){
+    /* returns the item with id: 1 from the list called 'Tasks'  */
+    
+    // data of the item
+    var id = item.get_id();
+    var title = item.get_item('Title');
+    var desc = item.get_item('Description');
+  });
+});
+```
+##### Create Item
+```javascript
+$sspjs.run(function($sp){ 
+  $sp.addListItemAsync('Tasks', {
+      Title: 'My new Item',
+      Description: 'some text to describe the item'
+    }).done(function(item){
+    /* returns the new item from the list called 'Tasks'  */
+  });
+});
+```
+##### Update Item
+```javascript
+$sspjs.run(function($sp){ 
+  $sp.updateListItemAsync('Tasks', 1, {
+      Description: 'some text to describe the updated item'
+    }).done(function(item){
+    /* updates the item with the id: 1 with a new Description */
+    /* returns the updated item from the list called 'Tasks'  */
+  });
+});
+```
+##### Delete Item by Id
+```javascript
+$sspjs.run(function($sp){ 
+  $sp.deleteListItemAsync('Tasks', 1).done(function(item){
+    /* deleted the item with the id: 1 */
+    /* returns the id of the deleted item from the list called 'Tasks'  */
+  });
+});
+```
 #### `$resources`
 tbd.
 #### `$logger`
