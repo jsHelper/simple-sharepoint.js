@@ -181,13 +181,14 @@ $sspjs.run(function($cache){
 The config object provides different configuration flags and attributes.
 ```javascript
 $sspjs.run(function($config){
+  // library configuration values
   $config.doCache = true;     // default: true
   $config.cacheExpires = 5;   // default: 5 minutes
   $config.doLogging = false;  // default: false
   
-  // SharePoint configuration value (READONLY)
+  // SharePoint configuration values (READONLY)
   imagesPath: '',             // returns the relative URL to '_layouts/images/'
-  language: 'en-US',          // language of the sitetemplate (used by $resources)
-  languageUI: 'en-US'         // language set by the browsers local
+  language: 'en-US',          // returns the language of the sitetemplate (used by $resources)
+  languageUI: 'en-US'         // returns the language set by the browsers local
 });
 ```
