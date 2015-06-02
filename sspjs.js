@@ -14,7 +14,7 @@
 ***************************************************************************************/
 
 
-var $spjs = {
+var $sspjs = {
     /// <summary>Do not call any method outside of the 'run' method</summary>
     user: null,
 
@@ -36,26 +36,26 @@ var $spjs = {
                 if (!_spPageContextInfo)
                     throw "No SharePoint context available!";
 
-                $spjs.sp.initContext(remoteUrl);
+                $sspjs.sp.initContext(remoteUrl);
 
                 // context informations
-                $spjs.config.cachePrefix = $spjs._hash(_spPageContextInfo.webAbsoluteUrl);
-                $spjs.config.webAbsoluteUrl = _spPageContextInfo.webAbsoluteUrl + '/';
-                $spjs.config.layoutsUrl = _spPageContextInfo.layoutsUrl + '/';
-                $spjs.config.imagesPath = $spjs.config.webAbsoluteUrl + $spjs.config.layoutsUrl + 'images/';
-                $spjs.config.language = _spPageContextInfo.currentCultureName;
-                $spjs.config.languageUI = _spPageContextInfo.currentUICultureName;
+                $sspjs.config.cachePrefix = $sspjs._hash(_spPageContextInfo.webAbsoluteUrl);
+                $sspjs.config.webAbsoluteUrl = _spPageContextInfo.webAbsoluteUrl + '/';
+                $sspjs.config.layoutsUrl = _spPageContextInfo.layoutsUrl + '/';
+                $sspjs.config.imagesPath = $sspjs.config.webAbsoluteUrl + $sspjs.config.layoutsUrl + 'images/';
+                $sspjs.config.language = _spPageContextInfo.currentCultureName;
+                $sspjs.config.languageUI = _spPageContextInfo.currentUICultureName;
 
                 var url = _spPageContextInfo.webServerRelativeUrl + "/";
-                var prom = $spjs.sp.getCurrentUserAsync();
+                var prom = $sspjs.sp.getCurrentUserAsync();
                 var user = null;
                 prom.done(function (user) {
-                    $spjs.user = user;
-                    $spjs.logger.log('user: ' + user.name);
-                    $spjs._injectAndExecute(func);
+                    $sspjs.user = user;
+                    $sspjs.logger.log('user: ' + user.name);
+                    $sspjs._injectAndExecute(func);
                 });
                 prom.fail(function (sender, message) {
-                    $spjs.logger.log(message);
+                    $sspjs.logger.log(message);
                 });
             }, "sp.js");
         });
@@ -77,16 +77,16 @@ var $spjs = {
         init: function (defaultResources) {
             /// <summary>Initialize resource dictionary with default language key value pairs object.</summary>
             /// <param name="defaultResources" type="Dictionary">Key value pairs object.</param>
-            $spjs.resources.default = defaultResources;
+            $sspjs.resources.default = defaultResources;
         },
         add: function (language, key, value) {
             /// <summary>Add a key value pair to the specified language dictionary.</summary>
             /// <param name="language" type="string">Language identifier (f.e. 'de-DE', 'en-US', ...).</param>
             /// <param name="key" type="string">Access key of the translation.</param>
             /// <param name="value" type="string">Text value.</param>
-            if (!$spjs.resources[language])
-                $spjs.resources[language] = {};
-            $spjs.resources[language][key] = value;
+            if (!$sspjs.resources[language])
+                $sspjs.resources[language] = {};
+            $sspjs.resources[language][key] = value;
         },
         getText: function (key, language) {
             /// <summary>Get the translated text in the current language or a specified language.</summary>
@@ -95,10 +95,10 @@ var $spjs = {
             /// <returns type="string">The text.</returns>
             var dict, result = key;
             if (!language)
-                language = $spjs.config.language;
-            dict = $spjs.resources[language];
+                language = $sspjs.config.language;
+            dict = $sspjs.resources[language];
             if (!dict)
-                dict = $spjs.resources.default;
+                dict = $sspjs.resources.default;
             if (dict[key] !== undefined && dict[key] !== null)
                 result = dict[key];
             return result;
@@ -109,7 +109,7 @@ var $spjs = {
             /// <summary>Log to browsers console object</summary>
             /// <param name="message" type="String">Log message.</param>
             try {
-                if (console && console.log && $spjs.config.doLogging === true)
+                if (console && console.log && $sspjs.config.doLogging === true)
                     console.log(message);
             } catch (err) { }
         }
@@ -117,28 +117,28 @@ var $spjs = {
     sp: {
         _context: null,
         _getSpContext: function (url, createNew) {
-            if ($spjs.sp._context === null || createNew === true) {
+            if ($sspjs.sp._context === null || createNew === true) {
                 if (!url) {
-                    $spjs.sp._context = SP.ClientContext.get_current();
+                    $sspjs.sp._context = SP.ClientContext.get_current();
                 }
-                $spjs.sp._context = new SP.ClientContext(url);
+                $sspjs.sp._context = new SP.ClientContext(url);
             }
-            return $spjs.sp._context;
+            return $sspjs.sp._context;
         },
         _getWeb: function (params) {
-            var ctx = $spjs.sp._getSpContext(params);
+            var ctx = $sspjs.sp._getSpContext(params);
             return ctx.get_web();
         },
         _getList: function(params){
-            var web = $spjs.sp._getWeb(params);
+            var web = $sspjs.sp._getWeb(params);
             return web.get_lists().getByTitle(params.listname);
         },
         _getItem: function(params){
-            var list = $spjs.sp._getList(params);
+            var list = $sspjs.sp._getList(params);
             return list.getItemById(params.id);
         },
         _executeAsync: function(loadArr, success, error){
-            var ctx = $spjs.sp._getSpContext();
+            var ctx = $sspjs.sp._getSpContext();
 
             if (loadArr) {
                 for (var i = 0; i < loadArr.length; i++) {
@@ -150,7 +150,7 @@ var $spjs = {
         initContext: function (url) {
             /// <summary>Creates a new SharePoint Client Context.</summary>
             /// <returns type="SP.Context">The Context.</returns>
-            var ctx = $spjs.sp._getSpContext(url);
+            var ctx = $sspjs.sp._getSpContext(url);
             return ctx;
         },
         getCurrentUserAsync: function () {
@@ -160,14 +160,14 @@ var $spjs = {
             var CACHE_KEY = 'CURRENT_USER';
 
             var dfd = new $.Deferred();
-            var userFromCache = $spjs.cache.get(CACHE_KEY);
+            var userFromCache = $sspjs.cache.get(CACHE_KEY);
             if (userFromCache && userFromCache.login) {
-                $spjs.logger.log('Current user from cache: ' + userFromCache.login)
+                $sspjs.logger.log('Current user from cache: ' + userFromCache.login)
                 dfd.resolve(userFromCache);
                 return dfd.promise();
             }
 
-            var ctx = $spjs.sp._getSpContext();
+            var ctx = $sspjs.sp._getSpContext();
             var oWeb = ctx.get_web();
             var usr = oWeb.get_currentUser();
             ctx.load(usr);
@@ -184,7 +184,7 @@ var $spjs = {
                 } else {
                     currentUser.readonly = true;
                 }
-                $spjs.cache.set(CACHE_KEY, currentUser);
+                $sspjs.cache.set(CACHE_KEY, currentUser);
                 dfd.resolve(currentUser);
             }), Function.createDelegate(this, function (sender, args) {
                 currentUser = null;
@@ -198,13 +198,13 @@ var $spjs = {
             /// <param name="key" type="String">Key to access the Property Bag value.</param>
             /// <param name="value" type="String">Value which should be stored to the Propery Bag.</param>
             var dfd = new $.Deferred();
-            var web = $spjs.sp._getWeb();
+            var web = $sspjs.sp._getWeb();
             var props = web.get_allProperties();
 
             props.set_item(key, value + '');
             web.update();
 
-            $spjs.sp._executeAsync([web], function (sender, args) {
+            $sspjs.sp._executeAsync([web], function (sender, args) {
                 dfd.resolve(args);
             }, function (sender, args) {
                 dfd.reject(sender, args.get_message(), args);
@@ -217,10 +217,10 @@ var $spjs = {
             /// <param name="key" type="String">Key to access the stored value.</param>
             /// <returns type="String">The value from the Property Bag.</returns>
             var dfd = new $.Deferred();
-            var web = $spjs.sp._getWeb();
+            var web = $sspjs.sp._getWeb();
             var props = web.get_allProperties();
 
-            $spjs.sp._executeAsync([web, props], function (sender, args) {
+            $sspjs.sp._executeAsync([web, props], function (sender, args) {
                 var value = props.get_item(key);
                 dfd.resolve(value);
             }, function (sender, args) {
@@ -234,10 +234,10 @@ var $spjs = {
             /// <param name="keys" type="String[]">Keys to access the stored values.</param>
             /// <returns type="String[]">The values from the Property Bag.</returns>
             var dfd = new $.Deferred();
-            var web = $spjs.sp._getWeb();
+            var web = $sspjs.sp._getWeb();
             var props = web.get_allProperties();
 
-            $spjs.sp._executeAsync([web, props], function (sender, args) {
+            $sspjs.sp._executeAsync([web, props], function (sender, args) {
                 var result = {};
                 for (var i = 0; i < keysArray.length; i++) {
                     try {
@@ -246,7 +246,7 @@ var $spjs = {
                             result[keysArray[i]] = val;
                         }
                     } catch (err) {
-                        $spjs.logger.log(err);
+                        $sspjs.logger.log(err);
                     }
                 }
                 dfd.resolve(result);
@@ -263,17 +263,17 @@ var $spjs = {
             var dfd = new $.Deferred();
 
             var CACHE_KEY = 'LIST_FIELDS_' + listname;
-            var fieldsFromCache = $spjs.cache.get(CACHE_KEY);
+            var fieldsFromCache = $sspjs.cache.get(CACHE_KEY);
             if (fieldsFromCache && fieldsFromCache.length) {
-                $spjs.logger.log('Fields from cache: ' + fieldsFromCache.length)
+                $sspjs.logger.log('Fields from cache: ' + fieldsFromCache.length)
                 dfd.resolve(fieldsFromCache);
                 return dfd.promise();
             }
 
-            var list = $spjs.sp._getList({ listname: listname });
+            var list = $sspjs.sp._getList({ listname: listname });
             var fields = list.get_fields();
 
-            $spjs.sp._executeAsync([fields], function (sender, args) {
+            $sspjs.sp._executeAsync([fields], function (sender, args) {
                 var fieldEnumerator = fields.getEnumerator();
                 var result = [];
                 while (fieldEnumerator.moveNext()) {
@@ -287,8 +287,8 @@ var $spjs = {
                         });
                     }
                 }
-                $spjs.logger.log(result.length + ' fields received.');
-                $spjs.cache.set(CACHE_KEY, result);
+                $sspjs.logger.log(result.length + ' fields received.');
+                $sspjs.cache.set(CACHE_KEY, result);
                 dfd.resolve(result);
             },function (sender, args) {
                 dfd.reject(sender, args.get_message(), args);
@@ -306,7 +306,7 @@ var $spjs = {
             if (!rowlimit)
                 rowlimit = 100;
             var dfd = new $.Deferred();
-            var ctx = new $spjs.sp._getSpContext();
+            var ctx = new $sspjs.sp._getSpContext();
             var list = ctx.get_web().get_lists().getByTitle(listname);
             var camlQuery = new SP.CamlQuery();
             camlQuery.set_viewXml('<View><RowLimit>' + rowlimit + '</RowLimit></View>');
@@ -315,7 +315,7 @@ var $spjs = {
             var collListItem = list.getItems(camlQuery);
 
             if (fields !== undefined && fields !== null) {
-                $spjs.logger.log('requested fields: ' + fields.join(', '));
+                $sspjs.logger.log('requested fields: ' + fields.join(', '));
                 ctx.load(collListItem, 'Include(' + fields.join(', ') + ')');
             } else {
                 ctx.load(collListItem);
@@ -327,7 +327,7 @@ var $spjs = {
                     var items = listItemEnumerator.get_current();
                     result.push(items);
                 }
-                $spjs.logger.log(result.length + ' items received.');
+                $sspjs.logger.log(result.length + ' items received.');
                 dfd.resolve(result);
             }), Function.createDelegate(this, function (sender, args) {
                 dfd.reject(sender, args.get_message(), args);
@@ -337,10 +337,10 @@ var $spjs = {
         },
         getListItemByIdAsync: function (listname, id) {
             var dfd = new $.Deferred();
-            var list = $spjs.sp._getList({ listname: listname });
+            var list = $sspjs.sp._getList({ listname: listname });
             var item = list.getItemById(id);
 
-            $spjs.sp._executeAsync([item], function (sender, args) {
+            $sspjs.sp._executeAsync([item], function (sender, args) {
                 dfd.resolve(item);
             }, function (sender, args) {
                 dfd.reject(sender, args.get_message(), args);
@@ -350,7 +350,7 @@ var $spjs = {
         },
         addListItemAsync: function (listname, item, setPropertiesFunc) {
             var dfd = new $.Deferred();
-            var list = $spjs.sp._getList({ listname: listname });
+            var list = $sspjs.sp._getList({ listname: listname });
 
             var itemCreateInfo = new SP.ListItemCreationInformation();
             var newItem = list.addItem(itemCreateInfo);
@@ -366,7 +366,7 @@ var $spjs = {
 
             newItem.update();
 
-            $spjs.sp._executeAsync([newItem], function (sender, args) {
+            $sspjs.sp._executeAsync([newItem], function (sender, args) {
                 dfd.resolve(newItem);
             }, function (sender, args) {
                 dfd.reject(sender, args.get_message(), args);
@@ -376,7 +376,7 @@ var $spjs = {
         },
         updateListItemAsync: function (listname, id, item, setPropertiesFunc) {
             var dfd = new $.Deferred();
-            var list = $spjs.sp._getList({ listname: listname });
+            var list = $sspjs.sp._getList({ listname: listname });
             var uItem = list.getItemById(id);
 
             for (var property in item) {
@@ -391,7 +391,7 @@ var $spjs = {
 
             uItem.update();
 
-            $spjs.sp._executeAsync([uItem], function (sender, args) {
+            $sspjs.sp._executeAsync([uItem], function (sender, args) {
                 dfd.resolve(uItem);
             }, function (sender, args) {
                 dfd.reject(sender, args.get_message(), args);
@@ -401,11 +401,11 @@ var $spjs = {
         },
         deleteListItemByIdAsync: function (listname, id) {
             var dfd = new $.Deferred();
-            var list = new $spjs.sp._getList({ listname: listname });
+            var list = new $sspjs.sp._getList({ listname: listname });
             var item = list.getItemById(id);
             item.deleteObject();
 
-            $spjs.sp._executeAsync(null, function (sender, args) {
+            $sspjs.sp._executeAsync(null, function (sender, args) {
                 dfd.resolve(id);
             }, function (sender, args) {
                 dfd.reject(sender, args.get_message(), args);
@@ -421,23 +421,23 @@ var $spjs = {
             var dfd = new $.Deferred();
 
             var CACHE_KEY = 'USER' + userId;
-            var userFromCache = $spjs.cache.get(CACHE_KEY);
+            var userFromCache = $sspjs.cache.get(CACHE_KEY);
             if (userFromCache && userFromCache.login) {
-                $spjs.logger.log('User from cache: ' + userFromCache.login)
+                $sspjs.logger.log('User from cache: ' + userFromCache.login)
                 dfd.resolve(userFromCache);
                 return dfd.promise();
             }
 
-            var web = $spjs.sp._getWeb();
+            var web = $sspjs.sp._getWeb();
             var user = web.getUserById(userId);
-            $spjs.sp._executeAsync([user], function (sender, args) {
+            $sspjs.sp._executeAsync([user], function (sender, args) {
                 var result = {
                     id: user.get_id(),
                     name: user.get_title(),
                     email: user.get_email(),
                     login: user.get_loginName()
                 };
-                $spjs.cache.set(CACHE_KEY, result);
+                $sspjs.cache.set(CACHE_KEY, result);
                 dfd.resolve(result);
             }, function (sender, args) {
                 dfd.reject(sender, args.get_message(), args);
@@ -450,7 +450,7 @@ var $spjs = {
             /// <param name="userId" type="Number">The user id of the current SPSite.</param>
             /// <returns type="String">The link.</returns>
 
-            return $spjs.config.webAbsoluteUrl + $spjs.config.layoutsUrl + 'userdisp.aspx?ID=' + userId;
+            return $sspjs.config.webAbsoluteUrl + $sspjs.config.layoutsUrl + 'userdisp.aspx?ID=' + userId;
         },
         loadUserDataAsync: function (accountName, properties) {
             /// <summary>Get user data by account name. Attention: Does only works with 'User Profile Service' running!</summary>
@@ -460,9 +460,9 @@ var $spjs = {
             var dfd = new $.Deferred();
 
             var CACHE_KEY = 'USER' + accountName;
-            var userDataFromCache = $spjs.cache.get(CACHE_KEY);
+            var userDataFromCache = $sspjs.cache.get(CACHE_KEY);
             if (userDataFromCache && userDataFromCache.LargeImage) {
-                $spjs.logger.log('UserData from cache: ' + accountName)
+                $sspjs.logger.log('UserData from cache: ' + accountName)
                 dfd.resolve(userDataFromCache);
                 return dfd.promise();
             }
@@ -472,7 +472,7 @@ var $spjs = {
                 properties = ["PreferredName", "PictureURL"];
 
             //Get Current Context	
-            var clientContext = $spjs.sp._getSpContext();
+            var clientContext = $sspjs.sp._getSpContext();
             //Get Instance of People Manager Class
             var peopleManager = new SP.UserProfiles.PeopleManager(clientContext);
             //Properties to fetch from the User Profile
@@ -489,7 +489,7 @@ var $spjs = {
                 for (var i = 0; i < properties.length; i++) {
                     userData[properties[i]] = userProfileProperties[i];
                 }
-                $spjs.cache.set(CACHE_KEY, userData);
+                $sspjs.cache.set(CACHE_KEY, userData);
                 dfd.resolve(userData);
             }), Function.createDelegate(this, function (sender, args) {
                 dfd.reject(sender, 'can not load user data', args);
@@ -528,7 +528,7 @@ var $spjs = {
             /// <summary>Use session storage or cookie on legacy browsers to store object by key.</summary>
             /// <param name="key" type="String">Key to access the stored value.</param>
             /// <param name="value" type="Object">Obect which should be stored.</param>
-            key = $spjs.config.cachePrefix + '_' + key;
+            key = $sspjs.config.cachePrefix + '_' + key;
 
             value = {
                 val: value,
@@ -536,9 +536,9 @@ var $spjs = {
             };
 
             if (!sessionStorage || !sessionStorage.setItem) {
-                $spjs.cache._setCookie(key, value);
+                $sspjs.cache._setCookie(key, value);
             } else {
-                $spjs.cache._setSessionCache(key, value);
+                $sspjs.cache._setSessionCache(key, value);
             }
         },
         get: function (key) {
@@ -548,13 +548,13 @@ var $spjs = {
 
             var value = null, data = null, created, now = Date.now();
 
-            if (!$spjs.config.doCache)
+            if (!$sspjs.config.doCache)
                 return null;
-            key = $spjs.config.cachePrefix + '_' + key;
+            key = $sspjs.config.cachePrefix + '_' + key;
             if (!sessionStorage || !sessionStorage.getItem)
-                value = $spjs.cache._getCookie(key);
+                value = $sspjs.cache._getCookie(key);
             else {
-                value = $spjs.cache._getSessionCache(key);
+                value = $sspjs.cache._getSessionCache(key);
             }
 
             if (!value || !value.val)
@@ -564,14 +564,14 @@ var $spjs = {
             data = value.val;
 
             // check expiration after 5 Minutes (per default)
-            if (now - created > 1000 * 60 * $spjs.config.cacheExpires) {
+            if (now - created > 1000 * 60 * $sspjs.config.cacheExpires) {
                 return null;
             }
             return data;
         },
         clear: function () {
             if (sessionStorage && sessionStorage.setItem)
-                $spjs.cache._clearSessionCache();
+                $sspjs.cache._clearSessionCache();
         }
     },
 
@@ -593,8 +593,8 @@ var $spjs = {
                 .split(/,/);
     },
     _injectAndExecute: function (f) {
-        var i, arguments = [], params = $spjs._getFunctionParameters(f);
-        arguments = $spjs._getParameterMapping(params);
+        var i, arguments = [], params = $sspjs._getFunctionParameters(f);
+        arguments = $sspjs._getParameterMapping(params);
         return f.apply(null, arguments);
     },
     _getParameterMapping: function (params) {
@@ -602,7 +602,7 @@ var $spjs = {
         for (i = 0; i < params.length; i++) {
             if (params[i] && params[i].length > 0) {
                 pName = params[i].substring(1);
-                args.push($spjs[pName]);
+                args.push($sspjs[pName]);
             } else {
                 args.push(null);
             }
