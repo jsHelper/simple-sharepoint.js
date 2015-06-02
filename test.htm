@@ -1,0 +1,22 @@
+﻿
+<script type="text/javascript" src="/sites/0001/Shared Documents/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="/sites/0001/Shared Documents/spjs.js"></script>
+<script type="text/javascript">
+    /// <reference path="jquery-2.1.4.min.js" />
+    /// <reference path="spjs.js" />
+
+    $spjs.run(function ($sp, $logger, $cache) {
+
+        $logger.log = function (message) {
+            $('#output').append('<div>' + message + '</div>');
+        }
+
+        $sp.getListItemsAsync('Tasks', null, null, 2).done(function (items) {
+            $logger.log(items.length);
+        });
+
+    });
+</script>
+
+<h1>Output</h1>
+<div id="output"></div>
