@@ -55,13 +55,42 @@ $sspjs.run(function($sp){
   $sp.getListItemsAsync('Tasks').done(function(items){
     /* returns all list items from the List called 'Tasks' */
   });
+  
+  // f.e. data of the first item
+  var id = items[0].get_id();
 });
 ```
 Request additional fields
 ```javascript
 $sspjs.run(function($sp){ 
-  $sp.getListItemsAsync('Tasks').done(function(items){
+  $sp.getListItemsAsync('Tasks', ['Title', 'Description']).done(function(items){
     /* returns all list items from the List called 'Tasks' */
+    
+    // f.e. data of the first item
+    var id = items[0].get_id();
+    var title = items[0].get_item('Title');
+    var desc = items[0].get_item('Description');
+  });
+});
+```
+Request with a view XML
+```javascript
+$sspjs.run(function($sp){ 
+  var viewXML = '<View><Query><OrderBy><FieldRef Name="Modified" Ascending="FALSE"/></OrderBy></Query></View>';
+  $sp.getListItemsAsync('Tasks', ['Title', 'Description'], viewXML).done(function(items){
+    /* returns all list items from the List called 'Tasks' ordered by Modified date */
+  });
+});
+```
+Limit the result
+```javascript
+$sspjs.run(function($sp){ 
+  $sp.getListItemsAsync('Tasks', ['Title', 'Description'], null, 2).done(function(items){
+    /* 
+      returns all list items from the List called 'Tasks' limited by 2.
+      Be careful: This option only works if you do not provide a viewXML. If you do need a viewXML you can limit 
+      your result by adding a rowlimit node to the view XML.
+    */
   });
 });
 ```
