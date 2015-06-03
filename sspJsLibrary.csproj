@@ -64,6 +64,10 @@
     <Content Include="lib\jquery-2.1.4.min.js" />
     <Content Include="LICENSE.md" />
     <Content Include="README.md" />
+    <Content Include="src\cache\cache.js" />
+    <Content Include="src\config\config.js" />
+    <Content Include="src\logger\logger.js" />
+    <Content Include="src\merge.ps1" />
     <Content Include="dist\sspjs.min.js.map">
       <DependentUpon>sspjs.min.js</DependentUpon>
     </Content>
@@ -77,7 +81,9 @@
   <ItemGroup>
     <Content Include="dist\sspjs.js" />
     <Content Include="examples\test.htm" />
-    <Content Include="src\common.js" />
+    <Content Include="src\resources\resources.js" />
+    <Content Include="src\sp\sp.js" />
+    <Content Include="src\sspjs.js" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
