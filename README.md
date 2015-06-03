@@ -1,4 +1,4 @@
-# $sspjs (Simple SharePoint JavaScript Library) #
+# $sspjs - simple SharePoint JavaScript #
 JavaScript Library to access SharePoint (2013 and above) data in a very easy way.
 
 ## Overview ###
