@@ -6,7 +6,7 @@ In this documentation you can read how to read lists, get, create, edit and dele
 
 ### Preconditions
 1. jQuery (> 1.6.0) 
-2. SharePoint (>= 2013)
+2. SharePoint 2013
 
 ### Example
 ```javascript
