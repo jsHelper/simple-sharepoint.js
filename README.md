@@ -5,7 +5,7 @@ JavaScript Library to access SharePoint (2013 and above) data in a very easy way
 In this documentation you can read how to read lists, get, create, edit and delete items from SharePoint lists. This library provides very simple and base function with no use of professional knowledge of the [SharePoint jsom (JavaScript Object Model)](https://msdn.microsoft.com/en-us/library/office/jj246996.aspx)
 
 ### Preconditions
-1. jQuery (>= 1.0) 
+1. jQuery (> 1.6.0) 
 2. SharePoint (>= 2013)
 
 ### Example
