@@ -4,6 +4,7 @@
     doLogging: false,
     cachePrefix: '0',
     webAbsoluteUrl: '',
+    siteRelativeUrl: '/',
     layoutsUrl: '_layouts/15/',
     imagesPath: '',
     language: 'en-US',

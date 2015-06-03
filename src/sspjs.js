@@ -40,6 +40,7 @@ var $sspjs = {
                 // context informations
                 $sspjs.config.cachePrefix = $sspjs._hash(_spPageContextInfo.webAbsoluteUrl);
                 $sspjs.config.webAbsoluteUrl = _spPageContextInfo.webAbsoluteUrl + '/';
+                $sspjs.config.siteRelativeUrl = _spPageContextInfo.siteServerRelativeUrl + (_spPageContextInfo.siteServerRelativeUrl !== '/' ? '/' : '');
                 $sspjs.config.layoutsUrl = _spPageContextInfo.layoutsUrl + '/';
                 $sspjs.config.imagesPath = $sspjs.config.webAbsoluteUrl + $sspjs.config.layoutsUrl + 'images/';
                 $sspjs.config.language = _spPageContextInfo.currentCultureName;
