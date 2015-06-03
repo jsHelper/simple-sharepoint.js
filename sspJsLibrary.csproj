@@ -57,10 +57,16 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="dist\sspjs.min.js">
+      <DependentUpon>sspjs.js</DependentUpon>
+    </Content>
     <Content Include="docs\documentation.html" />
     <Content Include="lib\jquery-2.1.4.min.js" />
     <Content Include="LICENSE.md" />
     <Content Include="README.md" />
+    <Content Include="dist\sspjs.min.js.map">
+      <DependentUpon>sspjs.min.js</DependentUpon>
+    </Content>
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
