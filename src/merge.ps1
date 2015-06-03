@@ -1,6 +1,7 @@
 ﻿
+$version = "1.0.0"
 $sourceFile = "sspjs.js"
-$targetFile = "..\dist\sspjs.js"
+$targetFile = "..\dist\sspjs-$version.js"
 
 Write-Host "read source: '$sourceFile'" -fore yellow
 $content = [string](gc $sourceFile -Raw)
