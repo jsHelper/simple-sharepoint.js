@@ -1,5 +1,5 @@
 ﻿
-$version = "1.0.2"
+$version = "1.0.3"
 $sourceFile = "sspjs.js"
 $targetFile = "..\dist\sspjs-$version.js"
 
