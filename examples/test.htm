@@ -1,14 +1,15 @@
 <!-- This file can be included in a Content Editor WebPart -->
 <!-- import files from document library -->
 <script type="text/javascript" src="/sites/0001/Shared Documents/jquery-2.1.4.min.js"></script>
-<script type="text/javascript" src="/sites/0001/Shared Documents/sspjs-1.0.0.min.js"></script>
+<script type="text/javascript" src="/sites/0001/Shared Documents/sspjs-1.0.4.js"></script>
 <script type="text/javascript">
     /// <reference path="jquery-2.1.4.min.js" />
-    /// <reference path="spjs.js" />
+    /// <reference path="sspjs-1.0.4.js" />
 
+    var $scope = {};
     $sspjs.run(function ($sp, $logger) {
 
-        // Overwrite default logging method to 
+        // Overwrite default logging method to
         // send the output to the DOM not to the browsers console
         $logger.log = function (message) {
             $('#output').append('<div>' + message + '</div>');
@@ -16,13 +17,75 @@
 
         // Access SharePoint to get all items from the list called 'Tasks'
         $sp.getListItemsAsync('Tasks', null, null, 2).done(function (items) {
-            
+
             // Log items count to the DOM
             $logger.log(items.length);
         });
 
+        // Access SharePoint to get all items from the list called 'Tasks'
+        $sp.getListItemsAsync('Documents', null, null, 2).done(function (items) {
+
+            // Log items count to the DOM
+            $logger.log(items.length);
+        }).fail(function (sender, message, args) {
+            $logger.log(message);
+        });
+
+        $('#addFileButton').on('click', function () {
+
+            $sp.notify('Uploading...');
+
+            var newFileName = $('#displayName').val();
+            var fileNameInput = $('#getFile');
+            var fileNameObj = fileNameInput[0];
+            var uploadAsync = $sp.uploadFileAsync("Shared Documents", newFileName, fileNameObj, 'Bilder');
+            uploadAsync.done(function (item, url) {
+                $logger.log(item.Id);
+
+                var updateAsync = $sp.updateListItemAsync("Documents", item.Id, { Title: newFileName });
+                updateAsync.done(function (item) {
+                    $logger.log(item.get_item('Title'));
+                    $sp.addStatus({ title: 'Upload complete', message: item.get_item('Title') });
+                });
+                updateAsync.fail(function (sender, message, args) {
+                    $logger.log(message);
+                });
+            });
+            uploadAsync.fail(function (sender, message, args) {
+                $logger.log(message);
+            });
+        });
+
+        $scope.lastId = null;
+        $('#addStatusBtn').on('click', function () {
+            $sp.notify('Adding status');
+            $scope.lastId = $sp.addStatus({ title: 'Added', message: $('#statusText').val(), color: 'green' });
+        });
+
+        $('#removeLastBtn').on('click', function () {
+            $sp.notify('Removing status');
+            $sp.removeStatus($scope.lastId);
+        });
+
+        $('#removeAllBtn').on('click', function () {
+            $sp.notify('Removing all status');
+            $sp.removeAllStatus();
+        });
     });
 </script>
+
+<fieldset>
+    <input id="getFile" type="file" />
+    <input id="displayName" type="text" value="Enter a unique name" />
+    <input id="addFileButton" type="button" value="Upload" />
+</fieldset>
+<br />
+<fieldset>
+    <input id="statusText" type="text" />
+    <input id="addStatusBtn" type="button" value="Show" />
+    <input id="removeLastBtn" type="button" value="Remove last" />
+    <input id="removeAllBtn" type="button" value="Remove all" />
+</fieldset>
 
 <h1>Output</h1>
 <div id="output"></div>
