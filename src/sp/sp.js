@@ -267,8 +267,52 @@
             var result = [];
             var listItemEnumerator = collListItem.getEnumerator();
             while (listItemEnumerator.moveNext()) {
-                var items = listItemEnumerator.get_current();
-                result.push(items);
+                var item = listItemEnumerator.get_current();
+                result.push(item);
+            }
+            $sspjs.logger.log(result.length + ' items received.');
+            dfd.resolve(result);
+        }), Function.createDelegate(this, function (sender, args) {
+            dfd.reject(sender, args.get_message(), args);
+        }));
+
+        return dfd.promise();
+    },
+    getListItemsAsObjectsAsync: function (listname, fields, viewXml, rowlimit) {
+        /// <summary>Get fields from the specified list.</summary>
+        /// <param name="listname" type="String">The listname.</param>
+        /// <param name="fields" type="String[]">Which fields should be requested.</param>
+        /// <param name="viewXml" type="String">(OPTIONAL) The view xml.</param>
+        /// <param name="rowlimit" type="Number">(OPTIONAL) The rowlimit. Only works if 'viewXml' is null.</param>
+        /// <returns type="object[]">The list items.</returns>
+        if (!rowlimit)
+            rowlimit = 100;
+        var dfd = new $.Deferred();
+        var ctx = new $sspjs.sp._getSpContext();
+        var list = ctx.get_web().get_lists().getByTitle(listname);
+        var camlQuery = new SP.CamlQuery();
+        camlQuery.set_viewXml('<View><RowLimit>' + rowlimit + '</RowLimit></View>');
+        if (viewXml)
+            camlQuery.set_viewXml(viewXml);
+        var collListItem = list.getItems(camlQuery);
+
+        if (fields !== undefined && fields !== null) {
+            $sspjs.logger.log('requested fields: ' + fields.join(', '));
+            ctx.load(collListItem, 'Include(' + fields.join(', ') + ')');
+        } else {
+            fields = ['ID'];
+            ctx.load(collListItem);
+        }
+        ctx.executeQueryAsync(Function.createDelegate(this, function (sender, args) {
+            var result = [];
+            var listItemEnumerator = collListItem.getEnumerator();
+            while (listItemEnumerator.moveNext()) {
+                var spitem = listItemEnumerator.get_current();
+                var item = {};
+                for (var i = 0; i < fields.length; i++) {
+                    item[fields[i]] = spitem.get_item(fields[i]);
+                }
+                result.push(item);
             }
             $sspjs.logger.log(result.length + ' items received.');
             dfd.resolve(result);

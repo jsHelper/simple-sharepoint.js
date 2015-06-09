@@ -15,18 +15,58 @@
             $('#output').append('<div>' + message + '</div>');
         }
 
-        // Access SharePoint to get all items from the list called 'Tasks'
-        $sp.getListItemsAsync('Tasks', null, null, 2).done(function (items) {
+        // Access SharePoint to get all items from the list called 'Documents'
+        var LIST = 'Documents';
+        $sp.getListItemsAsObjectsAsync(LIST, ['ID', 'LinkFilename', 'Title']).done(function (items) {
 
-            // Log items count to the DOM
-            $logger.log(items.length);
-        });
+            for (var i = 0; i < items.length; i++) {
+                $('#fileList')
+                    .append($("<option></option>")
+                    .attr("value", items[i].ID)
+                    .text(items[i].LinkFilename));
+            }
 
-        // Access SharePoint to get all items from the list called 'Tasks'
-        $sp.getListItemsAsync('Documents', null, null, 2).done(function (items) {
+            for (var i = 0; i < items.length; i++) {
+                var currentId = items[i].ID;
+                var currentName = items[i].LinkFilename
+                $('#spList')
+                    .append($("<div></div>")
+                    .attr("data-id", currentId)
+                    .attr("selectable", true)
+                    .text(currentName))
+                    .append($('<div></div>')
+                        .append($('<a href="#">Load versions  </a>')
+                            .attr('data-id', currentId)
+                            .on('click', function () {
+                                $sp.notify('Loading history...');
+                                var id = $(this).data('id');
+                                var getFileUrl = $sp.getFileUrlAsync(LIST, id);
+                                getFileUrl.done(function (url) {
+                                    var getHistory = $sp.getFileHistoryAsync(LIST, url);
+                                    getHistory.done(function (versions) {
+                                        $elem = $("select[data-id='" + id + "']");
+                                        $elem.empty();
+                                        for (var i = 0; i < versions.length; i++) {
+                                            $elem
+                                                .append($("<option></option>")
+                                                .attr("value", versions[i].get_id())
+                                                .text(versions[i].get_versionLabel() + ' (' + versions[i].get_size() + ')'));
+                                        }
+                                    });
+                                    getHistory.fail(function (sender, message, args) {
+                                        $logger.log(message);
+                                    });
+                                });
+                                getFileUrl.fail(function (sender, message, args) {
+                                    $logger.log(message);
+                                });
+                            })
+                        ).append($('<select></select>')
+                            .attr('data-id', currentId))
+                    );
 
-            // Log items count to the DOM
-            $logger.log(items.length);
+            }
+
         }).fail(function (sender, message, args) {
             $logger.log(message);
         });
@@ -38,7 +78,7 @@
             var newFileName = $('#displayName').val();
             var fileNameInput = $('#getFile');
             var fileNameObj = fileNameInput[0];
-            var uploadAsync = $sp.uploadFileAsync("Shared Documents", newFileName, fileNameObj, 'Bilder');
+            var uploadAsync = $sp.uploadFileAsync("Shared Documents", newFileName, fileNameObj);
             uploadAsync.done(function (item, url) {
                 $logger.log(item.Id);
 
@@ -71,21 +111,65 @@
             $sp.notify('Removing all status');
             $sp.removeAllStatus();
         });
+
+        $('#displayHistoryBtn').on('click', function () {
+            $sp.notify('Loading history...');
+
+            var id = $('#fileList option:selected').val();
+            var getFileUrl = $sp.getFileUrlAsync('Documents', id);
+            getFileUrl.done(function (url) {
+                var getHistory = $sp.getFileHistoryAsync('Documents', url);
+                getHistory.done(function (versions) {
+                    $('#fileHistoryList').empty();
+                    for (var i = 0; i < versions.length; i++) {
+                        $('#fileHistoryList')
+                            .append($("<option></option>")
+                            .attr("value", versions[i].get_id())
+                            .text(versions[i].get_versionLabel() + ' (' + versions[i].get_size() + ')'));
+                    }
+                });
+                getHistory.fail(function (sender, message, args) {
+                    $logger.log(message);
+                });
+            });
+            getFileUrl.fail(function (sender, message, args) {
+                $logger.log(message);
+            });
+        });
     });
 </script>
 
+
+<h2>List</h2>
+<div id="spList">
+
+</div>
+<br />
+
+<h2>File upload</h2>
 <fieldset>
     <input id="getFile" type="file" />
     <input id="displayName" type="text" value="Enter a unique name" />
     <input id="addFileButton" type="button" value="Upload" />
 </fieldset>
 <br />
+
+<h2>Notifications</h2>
 <fieldset>
     <input id="statusText" type="text" />
     <input id="addStatusBtn" type="button" value="Show" />
     <input id="removeLastBtn" type="button" value="Remove last" />
     <input id="removeAllBtn" type="button" value="Remove all" />
 </fieldset>
+<br />
 
-<h1>Output</h1>
+<h2>Version history</h2>
+<fieldset>
+    <select id="fileList"></select>
+    <input id="displayHistoryBtn" type="button" value="Load History" />
+    <select id="fileHistoryList"></select>
+</fieldset>
+<br />
+
+<h2>Output</h2>
 <div id="output"></div>
