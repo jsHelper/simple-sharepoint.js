@@ -278,13 +278,34 @@
 
         return dfd.promise();
     },
-    getListItemByIdAsync: function (listname, id) {
-        var dfd = new $.Deferred();
-        var list = $sspjs.sp._getList({ listname: listname });
-        var item = list.getItemById(id);
+    getListItemByIdAsync: function (listname, id, fields, isFile) {
 
-        $sspjs.sp._executeAsync([item], function (sender, args) {
-            dfd.resolve(item);
+        if (!fields)
+            fields = [];
+
+        var file;
+        var dfd = new $.Deferred();
+        var ctx = new $sspjs.sp._getSpContext();
+        var list = ctx.get_web().get_lists().getByTitle(listname);
+        var item = list.getItemById(id);
+        if (isFile === true) {
+            fields = ['File', 'FileSystemObjectType'];
+        }
+
+        if (fields && fields.length > 0) {
+            fields.splice(0, 0, item);
+            ctx.load.apply(ctx, fields);
+        } else {
+            ctx.load(item);
+        }
+
+        ctx.executeQueryAsync(function (sender, args) {
+            if (isFile === true) {
+                file = item.get_file();
+                dfd.resolve(file.get_serverRelativeUrl());
+            } else {
+                dfd.resolve(item);
+            }
         }, function (sender, args) {
             dfd.reject(sender, args.get_message(), args);
         });
@@ -516,5 +537,41 @@
     },
     removeAllStatus: function () {
         SP.UI.Status.removeAllStatus(true);
+    },
+    getFileUrlAsync: function (listname, id) {
+        var dfd = new $.Deferred();
+        var getListItem = $sspjs.sp.getListItemByIdAsync(listname, id, null, true);
+        getListItem.done(function (url) {
+            dfd.resolve(url);
+        });
+        getListItem.fail(function (sender, message, args) {
+            dfd.reject(sender, message, args);
+        });
+
+        return dfd.promise();
+    },
+    getFileHistoryAsync: function (listname, filePath) {
+        var dfd = new $.Deferred();
+        var web = $sspjs.sp._getWeb();
+        var listItemInfo = web.getFileByServerRelativeUrl(filePath);
+        var listItemFields = listItemInfo.get_listItemAllFields();
+        $sspjs.sp._executeAsync([web, listItemInfo, listItemFields], function (sender, args) {
+            var versions = listItemInfo.get_versions();
+            $sspjs.sp._executeAsync([versions], function (sender, args) {
+                var result = [];
+                var versionsEnum = versions.getEnumerator();
+                while (versionsEnum.moveNext()) {
+                    var listItemVersion = versionsEnum.get_current();
+                    result.push(listItemVersion);
+                }
+                dfd.resolve(result);
+            }, function (sender, args) {
+                dfd.reject(sender, args.get_message(), args);
+            });
+        }, function (sender, args) {
+            dfd.reject(sender, args.get_message(), args);
+        });
+
+        return dfd.promise();
     }
 }
