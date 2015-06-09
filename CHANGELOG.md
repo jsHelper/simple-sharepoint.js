@@ -18,3 +18,24 @@
     // to call on dialog page
     $sp.closeModalDialog(returnValue);
 ```
+
+# 1.0.4 #
+- Notification support (Notification / Status)
+```javascript
+
+    // simple notification (disappearing after few seconds)
+    $sp.notify(message);
+    
+    // to add status to the SP status bar
+    var id = $sp.addStatus({
+        title: 'whatever',
+        message: 'some text',
+        color: 'red' / * Optional: default is green */
+    });
+    
+    // to remove status
+    $sp.removeStatus(id);
+    
+    // to remove all status
+    $sp.removeAllStatus();
+```
