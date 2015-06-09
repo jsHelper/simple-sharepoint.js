@@ -137,7 +137,7 @@ $sspjs.run(function($sp){
 ##### Delete Item by Id
 ```javascript
 $sspjs.run(function($sp){ 
-  $sp.deleteListItemAsync('Tasks', 1).done(function(item){
+  $sp.deleteListItemAsync('Tasks', 1).done(function(id){
     /* deleted the item with the id: 1 */
     /* returns the id of the deleted item from the list called 'Tasks'  */
   });
