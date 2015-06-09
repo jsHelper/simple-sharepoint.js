@@ -1,4 +1,66 @@
-﻿sp = {
+
+/**************************************************************************************
+    Requires: 
+        jQuery		    >= 1.0.0
+        SharePoint JS   >= 15 (SharePoint 2013)
+        Browser         > IE9
+
+    Notes and Warrenty:
+        This is a small library access SharePoint in a very easy way. There is 
+        only base functionality implemented. Please do not copy without credit the
+        developers. 
+        There is no warrenty of data loss, security or something else. You can use 
+        as it is.
+***************************************************************************************/
+
+
+var $sspjs = {
+    /// <summary>Do not call any method outside of the 'run' method</summary>
+    user: null,
+    run: function (func, remoteUrl) {
+        /// <summary>Single point of start. Creates a SharePoint scope to ensure SP access. </summary>
+        /// <param name="func" type="Function">
+        /// <para> f.e. function( $sp, $user) { /* do something with current user and SharePoint */ }); </para>
+        /// <para></para>
+        /// <para> $user: the current logged in user. </para>
+        /// <para> $config: current configuration. </para>
+        /// <para> $resources: implementation of a resource manager. </para>
+        /// <para> $logger: logging class to do logging in browser window. </para>
+        /// <para> $sp: handles and provides SharePoint access. </para>
+        /// <para> $cache: caching instance. </para>
+        /// </param>
+        /// <param name="remoteUrl" type="string">Create a remote SharePoint context</param>
+        $(document).ready(function () {
+            ExecuteOrDelayUntilScriptLoaded(function () {
+                if (!_spPageContextInfo)
+                    throw "No SharePoint context available!";
+
+                $sspjs.sp.initContext(remoteUrl);
+
+                // context informations
+                $sspjs.config.cachePrefix = $sspjs._hash(_spPageContextInfo.webAbsoluteUrl);
+                $sspjs.config.webAbsoluteUrl = _spPageContextInfo.webAbsoluteUrl + '/';
+                $sspjs.config.siteRelativeUrl = _spPageContextInfo.siteServerRelativeUrl + (_spPageContextInfo.siteServerRelativeUrl !== '/' ? '/' : '');
+                $sspjs.config.layoutsUrl = _spPageContextInfo.layoutsUrl + '/';
+                $sspjs.config.imagesPath = $sspjs.config.webAbsoluteUrl + $sspjs.config.layoutsUrl + 'images/';
+                $sspjs.config.language = _spPageContextInfo.currentCultureName;
+                $sspjs.config.languageUI = _spPageContextInfo.currentUICultureName;
+
+                var url = _spPageContextInfo.webServerRelativeUrl + "/";
+                var prom = $sspjs.sp.getCurrentUserAsync();
+                var user = null;
+                prom.done(function (user) {
+                    $sspjs.user = user;
+                    $sspjs.logger.log('user: ' + user.name);
+                    $sspjs._injectAndExecute(func);
+                });
+                prom.fail(function (sender, message) {
+                    $sspjs.logger.log(message);
+                });
+            }, "sp.js");
+        });
+    },
+    sp : {
     _context: null,
     _getSpContext: function (url, createNew) {
         if ($sspjs.sp._context === null || createNew === true) {
@@ -517,4 +579,169 @@
     removeAllStatus: function () {
         SP.UI.Status.removeAllStatus(true);
     }
-}
+},
+    resources : {
+    default: {},
+    init: function (defaultResources) {
+        /// <summary>Initialize resource dictionary with default language key value pairs object.</summary>
+        /// <param name="defaultResources" type="Dictionary">Key value pairs object.</param>
+        $sspjs.resources.default = defaultResources;
+    },
+    add: function (language, key, value) {
+        /// <summary>Add a key value pair to the specified language dictionary.</summary>
+        /// <param name="language" type="string">Language identifier (f.e. 'de-DE', 'en-US', ...).</param>
+        /// <param name="key" type="string">Access key of the translation.</param>
+        /// <param name="value" type="string">Text value.</param>
+        if (!$sspjs.resources[language])
+            $sspjs.resources[language] = {};
+        $sspjs.resources[language][key] = value;
+    },
+    getText: function (key, language) {
+        /// <summary>Get the translated text in the current language or a specified language.</summary>
+        /// <param name="key" type="string">Text identifier key.</param>
+        /// <param name="language" type="string">(OPTIONAL) Language identifier (f.e. 'de-DE', 'en-US', ...).</param>
+        /// <returns type="string">The text.</returns>
+        var dict, result = key;
+        if (!language)
+            language = $sspjs.config.language;
+        dict = $sspjs.resources[language];
+        if (!dict)
+            dict = $sspjs.resources.default;
+        if (dict[key] !== undefined && dict[key] !== null)
+            result = dict[key];
+        return result;
+    }
+},
+    logger : {
+    log: function (message) {
+        /// <summary>Log to browsers console object</summary>
+        /// <param name="message" type="String">Log message.</param>
+        try {
+            if (console && console.log && $sspjs.config.doLogging === true)
+                console.log(message);
+        } catch (err) { }
+    }
+},
+    config : {
+    doCache: true,
+    cacheExpires: 5,
+    doLogging: false,
+    cachePrefix: '0',
+    webAbsoluteUrl: '',
+    siteRelativeUrl: '/',
+    layoutsUrl: '_layouts/15/',
+    imagesPath: '',
+    language: 'en-US',
+    languageUI: 'en-US'
+},
+    cache : {
+    _setCookie: function (key, value) {
+        var expires = new Date();
+        var val = JSON.stringify(value);
+        expires.setTime(expires.getTime() + (1 * 60 * 60 * 1000));
+        document.cookie = key + '=' + val + ';expires=' + expires.toUTCString();
+    },
+    _getCookie: function (key) {
+        var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
+        var value = keyValue ? keyValue[2] : null;
+        if (!value)
+            return null;
+        return JSON.parse(value);
+    },
+    _setSessionCache: function (key, value) {
+        var val = JSON.stringify(value);
+        sessionStorage.setItem(key, val);
+    },
+    _getSessionCache: function (key) {
+        var value = sessionStorage.getItem(key);
+        if (!value)
+            return null;
+        return JSON.parse(value);
+    },
+    _clearSessionCache: function () {
+        sessionStorage.clear();
+    },
+    set: function (key, value) {
+        /// <summary>Use session storage or cookie on legacy browsers to store object by key.</summary>
+        /// <param name="key" type="String">Key to access the stored value.</param>
+        /// <param name="value" type="Object">Obect which should be stored.</param>
+        key = $sspjs.config.cachePrefix + '_' + key;
+
+        value = {
+            val: value,
+            created: Date.now()
+        };
+
+        if (!sessionStorage || !sessionStorage.setItem) {
+            $sspjs.cache._setCookie(key, value);
+        } else {
+            $sspjs.cache._setSessionCache(key, value);
+        }
+    },
+    get: function (key) {
+        /// <summary>Use session storage or cookie on legacy browsers to get object by key.</summary>
+        /// <param name="key" type="String">Key to access the stored value.</param>
+        /// <returns type="Object">The object.</returns>
+
+        var value = null, data = null, created, now = Date.now();
+
+        if (!$sspjs.config.doCache)
+            return null;
+        key = $sspjs.config.cachePrefix + '_' + key;
+        if (!sessionStorage || !sessionStorage.getItem)
+            value = $sspjs.cache._getCookie(key);
+        else {
+            value = $sspjs.cache._getSessionCache(key);
+        }
+
+        if (!value || !value.val)
+            return null;
+
+        created = value.created;
+        data = value.val;
+
+        // check expiration after 5 Minutes (per default)
+        if (now - created > 1000 * 60 * $sspjs.config.cacheExpires) {
+            return null;
+        }
+        return data;
+    },
+    clear: function () {
+        if (sessionStorage && sessionStorage.setItem)
+            $sspjs.cache._clearSessionCache();
+    }
+},
+    _hash: function (value) {
+        var hash = 0;
+        if (value.length == 0) return hash;
+        for (i = 0; i < value.length; i++) {
+            char = value.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        return hash;
+    },
+    _getFunctionParameters: function (f) {
+        return f.toString()
+                .replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s))/mg, '')
+                .match(/^function\s*[^\(]*\(\s*([^\)]*)\)/m)[1]
+                .split(/,/);
+    },
+    _injectAndExecute: function (f) {
+        var i, arguments = [], params = $sspjs._getFunctionParameters(f);
+        arguments = $sspjs._getParameterMapping(params);
+        return f.apply(null, arguments);
+    },
+    _getParameterMapping: function (params) {
+        var pName, args = [];
+        for (i = 0; i < params.length; i++) {
+            if (params[i] && params[i].length > 0) {
+                pName = params[i].substring(1);
+                args.push($sspjs[pName]);
+            } else {
+                args.push(null);
+            }
+        };
+        return args;
+    }
+};
