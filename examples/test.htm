@@ -1,13 +1,13 @@
 <!-- This file can be included in a Content Editor WebPart -->
 <!-- import files from document library -->
 <script type="text/javascript" src="/sites/0001/Shared Documents/jquery-2.1.4.min.js"></script>
-<script type="text/javascript" src="/sites/0001/Shared Documents/sspjs-1.0.4.js"></script>
+<script type="text/javascript" src="/sites/0001/Shared Documents/sspjs-1.1.4.js"></script>
 <script type="text/javascript">
     /// <reference path="jquery-2.1.4.min.js" />
-    /// <reference path="sspjs-1.0.4.js" />
+    /// <reference path="sspjs-1.1.4.js" />
 
     var $scope = {};
-    $sspjs.run(function ($sp, $logger) {
+    $sspjs(function ($sp, $logger) {
 
         // Overwrite default logging method to
         // send the output to the DOM not to the browsers console
@@ -16,59 +16,39 @@
         }
 
         // Access SharePoint to get all items from the list called 'Documents'
-        var LIST = 'Documents';
-        $sp.getListItemsAsObjectsAsync(LIST, ['ID', 'LinkFilename', 'Title']).done(function (items) {
+        var listActions = $sp.list('Documents').init();
+        var documentActions = $sp.list('Shared Documents');
+        listActions.getItemsAsync({ query: '$select=Id,Title,LinkFilename' }).done(function (items) {
 
             for (var i = 0; i < items.length; i++) {
-                $('#fileList')
-                    .append($("<option></option>")
-                    .attr("value", items[i].ID)
-                    .text(items[i].LinkFilename));
-            }
-
-            for (var i = 0; i < items.length; i++) {
-                var currentId = items[i].ID;
-                var currentName = items[i].LinkFilename
                 $('#spList')
-                    .append($("<div></div>")
-                    .attr("data-id", currentId)
-                    .attr("selectable", true)
-                    .text(currentName))
-                    .append($('<div></div>')
-                        .append($('<a href="#">Load versions  </a>')
-                            .attr('data-id', currentId)
-                            .on('click', function () {
-                                $sp.notify('Loading history...');
-                                var id = $(this).data('id');
-                                var getFileUrl = $sp.getFileUrlAsync(LIST, id);
-                                getFileUrl.done(function (url) {
-                                    var getHistory = $sp.getFileHistoryAsync(LIST, url);
-                                    getHistory.done(function (versions) {
-                                        $elem = $("select[data-id='" + id + "']");
-                                        $elem.empty();
-                                        for (var i = 0; i < versions.length; i++) {
-                                            $elem
-                                                .append($("<option></option>")
-                                                .attr("value", versions[i].get_id())
-                                                .text(versions[i].get_versionLabel() + ' (' + versions[i].get_size() + ')'));
-                                        }
+                    .append($("<tr></tr>")
+                        .append($('<td></td>')
+                            .text(items[i].Id))
+                        .append($('<td></td>')
+                            .text(items[i].LinkFilename))
+                        .append($('<td></td>')
+                            .append($('<input type="button" value="löschen" />')
+                                .attr('data-id', items[i].Id)
+                                .on('click', function () {
+                                    var id = $(this).data('id');
+                                    var deleteAsync = listActions.deleteAsync(id);
+                                    deleteAsync.done(function () {
+                                        $sp.addStatus({ title: 'Deleted', message: id });
                                     });
-                                    getHistory.fail(function (sender, message, args) {
-                                        $logger.log(message);
+                                    deleteAsync.fail(function () {
+                                        $sp.addStatus({ title: 'Failed', color: 'red', message: id });
                                     });
-                                });
-                                getFileUrl.fail(function (sender, message, args) {
-                                    $logger.log(message);
-                                });
-                            })
-                        ).append($('<select></select>')
-                            .attr('data-id', currentId))
-                    );
-
+                                })))
+                    .attr("data-id", items[i].Id));
             }
 
         }).fail(function (sender, message, args) {
             $logger.log(message);
+        });
+
+        listActions.getItemAsync(2).done(function (item) {
+            $logger.log(item.Id);
         });
 
         $('#addFileButton').on('click', function () {
@@ -76,16 +56,14 @@
             $sp.notify('Uploading...');
 
             var newFileName = $('#displayName').val();
-            var fileNameInput = $('#getFile');
-            var fileNameObj = fileNameInput[0];
-            var uploadAsync = $sp.uploadFileAsync("Shared Documents", newFileName, fileNameObj);
+            var $input = $('#getFile');
+            var uploadAsync = documentActions.uploadAsync($input, newFileName);
             uploadAsync.done(function (item, url) {
                 $logger.log(item.Id);
 
-                var updateAsync = $sp.updateListItemAsync("Documents", item.Id, { Title: newFileName });
+                var updateAsync = listActions.updateAsync(item.Id, { Title: newFileName });
                 updateAsync.done(function (item) {
-                    $logger.log(item.get_item('Title'));
-                    $sp.addStatus({ title: 'Upload complete', message: item.get_item('Title') });
+                    $sp.addStatus({ title: 'Upload complete', message: newFileName });
                 });
                 updateAsync.fail(function (sender, message, args) {
                     $logger.log(message);
@@ -141,9 +119,7 @@
 
 
 <h2>List</h2>
-<div id="spList">
-
-</div>
+<table id="spList"></table>
 <br />
 
 <h2>File upload</h2>

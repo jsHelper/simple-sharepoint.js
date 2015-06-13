@@ -29,7 +29,7 @@
         /// <summary>Use session storage or cookie on legacy browsers to store object by key.</summary>
         /// <param name="key" type="String">Key to access the stored value.</param>
         /// <param name="value" type="Object">Obect which should be stored.</param>
-        key = $sspjs.config.cachePrefix + '_' + key;
+        key = sspjs.config.cachePrefix + '_' + key;
 
         value = {
             val: value,
@@ -37,9 +37,9 @@
         };
 
         if (!sessionStorage || !sessionStorage.setItem) {
-            $sspjs.cache._setCookie(key, value);
+            sspjs.cache._setCookie(key, value);
         } else {
-            $sspjs.cache._setSessionCache(key, value);
+            sspjs.cache._setSessionCache(key, value);
         }
     },
     get: function (key) {
@@ -49,13 +49,13 @@
 
         var value = null, data = null, created, now = Date.now();
 
-        if (!$sspjs.config.doCache)
+        if (!sspjs.config.doCache)
             return null;
-        key = $sspjs.config.cachePrefix + '_' + key;
+        key = sspjs.config.cachePrefix + '_' + key;
         if (!sessionStorage || !sessionStorage.getItem)
-            value = $sspjs.cache._getCookie(key);
+            value = sspjs.cache._getCookie(key);
         else {
-            value = $sspjs.cache._getSessionCache(key);
+            value = sspjs.cache._getSessionCache(key);
         }
 
         if (!value || !value.val)
@@ -65,13 +65,13 @@
         data = value.val;
 
         // check expiration after 5 Minutes (per default)
-        if (now - created > 1000 * 60 * $sspjs.config.cacheExpires) {
+        if (now - created > 1000 * 60 * sspjs.config.cacheExpires) {
             return null;
         }
         return data;
     },
     clear: function () {
         if (sessionStorage && sessionStorage.setItem)
-            $sspjs.cache._clearSessionCache();
+            sspjs.cache._clearSessionCache();
     }
 }
