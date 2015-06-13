@@ -39,3 +39,12 @@
     // to remove all status
     $sp.removeAllStatus();
 ```
+
+# 1.1.4 #
+- Changed creation of the $sspjs object
+- $sspjs now creates the context, no need to call .run(func)
+```javascript
+ $sspjs(function($sp){
+    /* do something with $sp */
+ });
+```
