@@ -22,8 +22,8 @@ $sspjs(function($sp, $logger){
   });
 });
 ```
-### The `.run(func)` Method
-By calling the `.run(func)` method a context will be created to ensure the accessability to the SharePoint JavaScript Context.
+### The `$sspjs(func)` Method
+By calling the `$sspjs(func)` method a context will be created to ensure the accessability to the SharePoint JavaScript Context.
 The inner `func` will be called after `.ready()` and after the `SP.js` have been loaded. The function parameters will be incjected by name, means you can call it with 
 ```javascript
 $sspjs(function($sp, $cache, $logger){ 
