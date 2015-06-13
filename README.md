@@ -10,7 +10,7 @@ In this documentation you can read how to read lists, get, create, edit and dele
 
 ### Example
 ```javascript
-$sspjs.run(function($sp, $logger){
+$sspjs(function($sp, $logger){
   // builds a SharePoint context 
   // to ensure access
   
@@ -26,7 +26,7 @@ $sspjs.run(function($sp, $logger){
 By calling the `.run(func)` method a context will be created to ensure the accessability to the SharePoint JavaScript Context.
 The inner `func` will be called after `.ready()` and after the `SP.js` have been loaded. The function parameters will be incjected by name, means you can call it with 
 ```javascript
-$sspjs.run(function($sp, $cache, $logger){ 
+$sspjs(function($sp, $cache, $logger){ 
   /* do something with $sp, $cache, $logger ... */ 
 });
 ```
@@ -42,7 +42,7 @@ Provides the base SharePoint access methods. Every method with the suffix 'Async
 
 ##### Get Fields
 ```javascript
-$sspjs.run(function($sp){ 
+$sspjs(function($sp){ 
   $sp.getListFieldsAsync('Tasks').done(function(fields){
     /*  returns all visible fields from the list called 'Tasks' */
     
@@ -56,7 +56,7 @@ If you have a Taxonomy Field the `.type` attribute will be `1000`.
 
 ##### Get Items
 ```javascript
-$sspjs.run(function($sp){ 
+$sspjs(function($sp){ 
   $sp.getListItemsAsync('Tasks').done(function(items){
     /* returns all list items from the list called 'Tasks' */
   });
@@ -67,7 +67,7 @@ $sspjs.run(function($sp){
 ```
 ###### Additional fields
 ```javascript
-$sspjs.run(function($sp){ 
+$sspjs(function($sp){ 
   $sp.getListItemsAsync('Tasks', ['Title', 'Description']).done(function(items){
     /* returns all list items from the list called 'Tasks' */
     
@@ -80,7 +80,7 @@ $sspjs.run(function($sp){
 ```
 ###### View XML
 ```javascript
-$sspjs.run(function($sp){ 
+$sspjs(function($sp){ 
   var viewXML = '<View><Query><OrderBy><FieldRef Name="Modified" Ascending="FALSE"/></OrderBy></Query></View>';
   $sp.getListItemsAsync('Tasks', ['Title', 'Description'], viewXML).done(function(items){
     /* returns all list items from the list called 'Tasks' ordered by Modified date */
@@ -89,7 +89,7 @@ $sspjs.run(function($sp){
 ```
 ###### Limit the results
 ```javascript
-$sspjs.run(function($sp){ 
+$sspjs(function($sp){ 
   $sp.getListItemsAsync('Tasks', ['Title', 'Description'], null, 2).done(function(items){
     /* 
       returns all list items from the list called 'Tasks' limited by 2.
@@ -101,7 +101,7 @@ $sspjs.run(function($sp){
 ```
 ##### Get Item by Id
 ```javascript
-$sspjs.run(function($sp){ 
+$sspjs(function($sp){ 
   $sp.getListItemByIdAsync('Tasks', 1).done(function(item){
     /* returns the item with id: 1 from the list called 'Tasks'  */
     
@@ -114,7 +114,7 @@ $sspjs.run(function($sp){
 ```
 ##### Create Item
 ```javascript
-$sspjs.run(function($sp){ 
+$sspjs(function($sp){ 
   $sp.addListItemAsync('Tasks', {
       Title: 'My new Item',
       Description: 'some text to describe the item'
@@ -125,7 +125,7 @@ $sspjs.run(function($sp){
 ```
 ##### Update Item
 ```javascript
-$sspjs.run(function($sp){ 
+$sspjs(function($sp){ 
   $sp.updateListItemAsync('Tasks', 1, {
       Description: 'some text to describe the updated item'
     }).done(function(item){
@@ -136,7 +136,7 @@ $sspjs.run(function($sp){
 ```
 ##### Delete Item by Id
 ```javascript
-$sspjs.run(function($sp){ 
+$sspjs(function($sp){ 
   $sp.deleteListItemAsync('Tasks', 1).done(function(id){
     /* deleted the item with the id: 1 */
     /* returns the id of the deleted item from the list called 'Tasks'  */
@@ -147,7 +147,7 @@ $sspjs.run(function($sp){
 There is also a basic implementation of a resource manager. This resources manager has been implemented to suppert
 localization of SharePoint list names. If you create a site collection or site in another language SharePoint spells your lists depending on this language. For example the default 'Tasks' list will be 'Aufgaben' if German will be selected.
 ```javascript
-$sspjs.run(function($resources, $sp){ 
+$sspjs(function($resources, $sp){ 
   // first you have to fill the resource manager with the localized strings
   // $resources.add([language code], [access key], [localized string])
   $resources.add('de-DE', 'LISTNAME', 'Aufgaben');
@@ -163,7 +163,7 @@ $sspjs.run(function($resources, $sp){
 #### `$logger`
 This object provides a simple log method. Messages will be logged to the browsers' default console. If the browser does not have a console nothing will be logged.
 ```javascript
-$sspjs.run(function($logger){
+$sspjs(function($logger){
   // $logger.log([message])
   $logger.log('Hi this is my new log message');
 });
@@ -171,7 +171,7 @@ $sspjs.run(function($logger){
 #### `$cache`
 The cache object provides a mechnism to store strings or objects to the browser cache. The [sessionStorage](https://developer.mozilla.org/de/docs/Web/API/Window/sessionStorage) will be used by default. If your browser does not support the sessionStorage all values will be stored as cookies.
 ```javascript
-$sspjs.run(function($cache){
+$sspjs(function($cache){
   // $cache.set([access key], [value])
   $cache.set('FIRST_VALUE_KEY','Value to store');
   // $cache.get([access key])
@@ -182,7 +182,7 @@ $sspjs.run(function($cache){
 #### `$config`
 The config object provides different configuration flags and attributes.
 ```javascript
-$sspjs.run(function($config){
+$sspjs(function($config){
   // library configuration values
   $config.doCache = true;     // default: true
   $config.cacheExpires = 5;   // default: 5 minutes
