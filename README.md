@@ -189,8 +189,8 @@ $sspjs.run(function($config){
   $config.doLogging = false;  // default: false
   
   // SharePoint configuration values (READONLY)
-  $config.imagesPath: '',             // returns the relative URL to '_layouts/images/'
-  $config.language: 'en-US',          // returns the language of the sitetemplate (used by $resources)
-  $config.languageUI: 'en-US'         // returns the language set by the browsers local
+  $config.imagesPath          // returns the relative URL to '_layouts/images/'
+  $config.language            // returns the language of the sitetemplate (used by $resources)
+  $config.languageUI          // returns the language set by the browsers local
 });
 ```
