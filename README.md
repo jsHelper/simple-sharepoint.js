@@ -32,7 +32,7 @@ $sspjs(function($sp, $cache, $logger){
 ```
 but also in another order 
 ```javascript
-$sspjs.run(function($cache, $sp, $logger){ 
+$sspjs(function($cache, $sp, $logger){ 
   /* do something with $sp, $cache, $logger ... */ 
 });
 ```
