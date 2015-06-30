@@ -1,5 +1,5 @@
 # $sspjs - simple SharePoint JavaScript #
-JavaScript Library to access SharePoint (2013 and above) data in a very easy way.
+JavaScript Library to access SharePoint 2013 (and maybe above) data in a very easy way.
 
 ## Overview ###
 In this documentation you can read how to read lists, get, create, edit and delete items from SharePoint lists. This library provides very simple and base function with no use of professional knowledge of the [SharePoint jsom (JavaScript Object Model)](https://msdn.microsoft.com/en-us/library/office/jj246996.aspx)
