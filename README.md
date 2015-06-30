@@ -14,10 +14,9 @@ $sspjs(function($sp, $logger){
   // builds a SharePoint context 
   // to ensure access
   
-  $sp.getListItemsAsync('Tasks', null, null, 2).done(function (items) {
-    // get items asynchronous from the list called 'Tasks' limit by 2 items
+  $sp.list('Tasks').getItemsAsync().done(function (items) {
+    // get items asynchronous from the list called 'Tasks'
     // logs the result count to the browser console window
-    
     $logger.log(items.length);
   });
 });
@@ -43,79 +42,58 @@ Provides the base SharePoint access methods. Every method with the suffix 'Async
 ##### Get Fields
 ```javascript
 $sspjs(function($sp){ 
-  $sp.getListFieldsAsync('Tasks').done(function(fields){
+  $sp.list('Tasks').getFieldsAsync.done(function(fields){
     /*  returns all visible fields from the list called 'Tasks' */
     
-    var internalName = fields[0].internalName;
-    var title = fields[0].title;
-    var type = fields[0].type; // SP.FieldType enumeration number
+    var internalName = fields[0].InternalName;
+    var title = fields[0].Title;
   });
 });
 ```
-If you have a Taxonomy Field the `.type` attribute will be `1000`.
 
 ##### Get Items
 ```javascript
 $sspjs(function($sp){ 
-  $sp.getListItemsAsync('Tasks').done(function(items){
+  $sp.list('Tasks').getItemsAsync().done(function(items){
     /* returns all list items from the list called 'Tasks' */
+    
+    // f.e. data of the first item
+    var id = items[0].Id;
   });
-  
-  // f.e. data of the first item
-  var id = items[0].get_id();
 });
 ```
 ###### Additional fields
 ```javascript
 $sspjs(function($sp){ 
-  $sp.getListItemsAsync('Tasks', ['Title', 'Description']).done(function(items){
+  $sp.list('Tasks').getItemsAsync({
+    query: '$select=Title,Description'
+  }).done(function(items){
     /* returns all list items from the list called 'Tasks' */
     
     // f.e. data of the first item
-    var id = items[0].get_id();
-    var title = items[0].get_item('Title');
-    var desc = items[0].get_item('Description');
+    var title = items[0].Title;
+    var desc = items[0].Description;
   });
 });
 ```
-###### View XML
-```javascript
-$sspjs(function($sp){ 
-  var viewXML = '<View><Query><OrderBy><FieldRef Name="Modified" Ascending="FALSE"/></OrderBy></Query></View>';
-  $sp.getListItemsAsync('Tasks', ['Title', 'Description'], viewXML).done(function(items){
-    /* returns all list items from the list called 'Tasks' ordered by Modified date */
-  });
-});
-```
-###### Limit the results
-```javascript
-$sspjs(function($sp){ 
-  $sp.getListItemsAsync('Tasks', ['Title', 'Description'], null, 2).done(function(items){
-    /* 
-      returns all list items from the list called 'Tasks' limited by 2.
-      Be careful: This option only works if you do not provide a viewXML. If you do need a viewXML you can limit 
-      your result by adding a rowlimit node to the view XML.
-    */
-  });
-});
-```
+
 ##### Get Item by Id
 ```javascript
 $sspjs(function($sp){ 
-  $sp.getListItemByIdAsync('Tasks', 1).done(function(item){
+  $sp('Tasks').getItemAsync(1).done(function(item){
     /* returns the item with id: 1 from the list called 'Tasks'  */
     
     // data of the item
-    var id = item.get_id();
-    var title = item.get_item('Title');
-    var desc = item.get_item('Description');
+    var id = item.Id
+    var title = item.Title;
+    var desc = item.Description;
   });
 });
 ```
 ##### Create Item
 ```javascript
 $sspjs(function($sp){ 
-  $sp.addListItemAsync('Tasks', {
+  $sp.list('Tasks').addAsync({
       Title: 'My new Item',
       Description: 'some text to describe the item'
     }).done(function(item){
@@ -126,7 +104,7 @@ $sspjs(function($sp){
 ##### Update Item
 ```javascript
 $sspjs(function($sp){ 
-  $sp.updateListItemAsync('Tasks', 1, {
+  $sp.list('Tasks').updateAsync(1, {
       Description: 'some text to describe the updated item'
     }).done(function(item){
     /* updates the item with the id: 1 with a new Description */
@@ -137,7 +115,7 @@ $sspjs(function($sp){
 ##### Delete Item by Id
 ```javascript
 $sspjs(function($sp){ 
-  $sp.deleteListItemAsync('Tasks', 1).done(function(id){
+  $sp.list('Tasks').deleteAsync(1).done(function(id){
     /* deleted the item with the id: 1 */
     /* returns the id of the deleted item from the list called 'Tasks'  */
   });
@@ -154,9 +132,9 @@ $sspjs(function($resources, $sp){
   $resources.add('en-US', 'LISTNAME', 'Tasks');
   
   // now you can use the localized string everywhere in your .run-Context
-  // $resources.getText([access key], optional:[language code = default site language])
-  var listname = $resources.getText('LISTNAME');
-  var listnameInGerman = $resources.getText('LISTNAME', 'de-DE');
+  // $resources.text([access key], optional:[language code = default site language])
+  var listname = $resources.text('LISTNAME');
+  var listnameInGerman = $resources.text('LISTNAME', 'de-DE');
 });
 ```
 
@@ -192,5 +170,38 @@ $sspjs(function($config){
   $config.imagesPath          // returns the relative URL to '_layouts/images/'
   $config.language            // returns the language of the sitetemplate (used by $resources)
   $config.languageUI          // returns the language set by the browsers local
+});
+```
+
+#### `$notify`
+The notification object provides functionality to display standard SharePoint notifications and status.
+```javascript
+$sspjs(function($notify){
+  $notify.show('Some text to display');
+  
+  var id = $notify.addStatus({
+    title: 'Some title',
+    message: 'some text to display',
+    color: '[OPTIONAL] color: red, yellow, green'
+  });
+  
+  // delete a status by id
+  $notify.removeStatus(id);
+  
+  // delete all added status
+  $notify.removeAllStatus();
+});
+```
+
+#### `$dialog`
+The dialog object provides functionality to display a SharePoint Dialog by URL.
+```javascript
+$sspjs(function($dialog){
+
+  // open by url
+  $dialog.openModalDialogAsync('https://github.com/jsHelper/simple-sharepoint.js');
+  
+  // if you are in a Dialog you can close it with return parameter
+  $dialog.closeModalDialog({ value: 'some result value'});
 });
 ```
