@@ -199,11 +199,11 @@ The dialog object provides functionality to display a SharePoint Dialog by URL.
 $sspjs(function($dialog){
 
   // open by url
-  var openedDialog = $dialog.open('/sites/0001/Shared%20Documents/Forms/EditForm.aspx?id=1');
-  openedDialog.done(function(result){
+  var openDialog = $dialog.open('/sites/0001/Shared%20Documents/Forms/EditForm.aspx?id=1');
+  openDialog.done(function(result){
     /* ok clicked */
   });
-  openedDialog.fail(function(result){
+  openDialog.fail(function(result){
     /* cancel clicked */
   });
   
