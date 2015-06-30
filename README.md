@@ -47,11 +47,9 @@ $sspjs(function($sp){
     
     var internalName = fields[0].InternalName;
     var title = fields[0].Title;
-    var type = fields[0].Type; // SP.FieldType enumeration number
   });
 });
 ```
-If you have a Taxonomy Field the `.type` attribute will be `1000`.
 
 ##### Get Items
 ```javascript
