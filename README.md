@@ -80,9 +80,7 @@ $sspjs(function($sp){
 ##### Get Item by Id
 ```javascript
 $sspjs(function($sp){ 
-  $sp('Tasks').getItemsAsync({
-    query: '$filter=Id eq 1'
-  }).done(function(item){
+  $sp('Tasks').getItemAsync(1).done(function(item){
     /* returns the item with id: 1 from the list called 'Tasks'  */
     
     // data of the item
