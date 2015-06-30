@@ -73,6 +73,8 @@
         ///include(logger)
         ///include(config)
         ///include(cache)
+        ///include(notify)
+        ///include(dialog)
         _hash: function (value) {
             var hash = 0;
             if (value.length == 0) return hash;
