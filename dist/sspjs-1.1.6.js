@@ -1032,6 +1032,10 @@
 },
         dialog : {
     open: function (url) {
+
+        if (!SP || !SP.UI || !SP.UI.DialogResult)
+            throw "No SP dialog objects found";
+
         var dfd = new $.Deferred();
         var options = SP.UI.$create_DialogOptions();
         options.url = url;
