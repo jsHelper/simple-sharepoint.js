@@ -1,7 +1,7 @@
 
 /**************************************************************************************
     Requires: 
-        jQuery		    >= 1.0.0
+        jQuery		    >= 1.6.0
         SharePoint JS   >= 15 (SharePoint 2013)
         Browser         > IE9
 
@@ -136,7 +136,9 @@
         }
     },
 
-    /* SharePoint jsom */
+    /* SharePoint jsom 
+     * --> [deprecated] only for backward compatibility
+     */
     /* privates */
     _context: null,
     _getSpContext: function (url, createNew) {
@@ -676,7 +678,7 @@
     },
 
 
-    /* with SP 2013 odata API */
+    /* With SP 2013 odata API */
     /* privates */
     _addFileToFolderAsync: function (filename, path, arrayBuffer) {
         return (function (scope, context) {
@@ -704,7 +706,9 @@
         return dfd.promise();
     },
 
-    /* public */
+    /* public 
+     * Use these methods to access SharePoint!
+     */
     item: function () {
         return (function (scope, context, instance) {
             scope = {
@@ -995,9 +999,15 @@
 },
         notify : {
     show: function (message) {
+        if (!SP || !SP.UI || !SP.UI.Status)
+            return;
+
         SP.UI.Notify.addNotification(message, false);
     },
     addStatus: function (options) {
+        if (!SP || !SP.UI || !SP.UI.Status)
+            return;
+
         if (!options.color) {
             options.color = 'yellow';
         }
@@ -1006,11 +1016,17 @@
         return statusID;
     },
     removeStatus: function (id) {
+        if (!SP || !SP.UI || !SP.UI.Status)
+            return;
+
         if (id) {
             SP.UI.Status.removeStatus(id);
         }
     },
     removeAllStatus: function () {
+        if (!SP || !SP.UI || !SP.UI.Status)
+            return;
+
         SP.UI.Status.removeAllStatus(true);
     }
 },

@@ -66,7 +66,9 @@
         }
     },
 
-    /* SharePoint jsom */
+    /* SharePoint jsom 
+     * --> [deprecated] only for backward compatibility
+     */
     /* privates */
     _context: null,
     _getSpContext: function (url, createNew) {
@@ -606,7 +608,7 @@
     },
 
 
-    /* with SP 2013 odata API */
+    /* With SP 2013 odata API */
     /* privates */
     _addFileToFolderAsync: function (filename, path, arrayBuffer) {
         return (function (scope, context) {
@@ -634,7 +636,9 @@
         return dfd.promise();
     },
 
-    /* public */
+    /* public 
+     * Use these methods to access SharePoint!
+     */
     item: function () {
         return (function (scope, context, instance) {
             scope = {
