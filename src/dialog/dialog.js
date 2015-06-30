@@ -1,5 +1,5 @@
 ﻿dialog = {
-    openModalDialogAsync: function (url) {
+    open: function (url) {
         var dfd = new $.Deferred();
         var options = SP.UI.$create_DialogOptions();
         options.url = url;
@@ -12,7 +12,7 @@
         SP.UI.ModalDialog.showModalDialog(options);
         return dfd.promise();
     },
-    closeModalDialog: function (returnValue) {
+    close: function (returnValue) {
         window.frameElement.commitPopup(returnValue);
     }
 }
