@@ -54,6 +54,13 @@
                     sspjs.config.language = _spPageContextInfo.currentCultureName;
                     sspjs.config.languageUI = _spPageContextInfo.currentUICultureName;
 
+                    if(JSRequest){
+                        JSRequest.EnsureSetup();
+                        sspjs.config.fileName = JSRequest.FileName;
+                        sspjs.config.pathName = JSRequest.PathName;
+                        sspjs.config.isDialog = (JSRequest.QueryString["isDlg"] === "1");
+                    }
+
                     var url = _spPageContextInfo.webServerRelativeUrl + "/";
                     var prom = sspjs.sp.getCurrentUserAsync();
                     var user = null;
@@ -75,6 +82,8 @@
         ///include(cache)
         ///include(notify)
         ///include(dialog)
+        ///include(url)
+        ///include(common)
         _hash: function (value) {
             var hash = 0;
             if (value.length == 0) return hash;

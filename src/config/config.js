@@ -8,5 +8,8 @@
     layoutsUrl: '_layouts/15/',
     imagesPath: '',
     language: 'en-US',
-    languageUI: 'en-US'
+    languageUI: 'en-US',
+    fileName: '',
+    pathName: '',
+    isDialog: false
 }

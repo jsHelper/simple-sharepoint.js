@@ -54,6 +54,13 @@
                     sspjs.config.language = _spPageContextInfo.currentCultureName;
                     sspjs.config.languageUI = _spPageContextInfo.currentUICultureName;
 
+                    if(JSRequest){
+                        JSRequest.EnsureSetup();
+                        sspjs.config.fileName = JSRequest.FileName;
+                        sspjs.config.pathName = JSRequest.PathName;
+                        sspjs.config.isDialog = (JSRequest.QueryString["isDlg"] === "1");
+                    }
+
                     var url = _spPageContextInfo.webServerRelativeUrl + "/";
                     var prom = sspjs.sp.getCurrentUserAsync();
                     var user = null;
@@ -174,7 +181,7 @@
     },
     
     /* public facing methods 
-     * --> [deprecated] only for backward compatibility
+     * --> [deprecated] for list operation methods -> only for backward compatibility
      */
     initContext: function (url) {
         /// <summary>Creates a new SharePoint Client Context.</summary>
@@ -709,7 +716,7 @@
     /* public 
      * Use these methods to access SharePoint!
      */
-    item: function () {
+    item: (function(){
         return (function (scope, context, instance) {
             scope = {
                 _default: {
@@ -733,12 +740,12 @@
             }
             return scope;
         })({}, sspjs.sp.$1, sspjs.sp);
-    },
-    lists: function () {
+    }),
+    lists: (function(){
         return (function (scope, context, instance) {
 
         })({}, sspjs.sp.$1, sspjs.sp);
-    },
+    }),
     list: function (listname) {
         return (function (scope, context, instance) {
             scope = {
@@ -806,17 +813,17 @@
                 },
                 uploadAsync: function ($sourceInput, newName, path) {
                     var dfd = new $.Deferred();
-                    var that = instance;
+                    var that = instance.sp;
                     if (!$sourceInput || $sourceInput.length === 0) {
                         throw "no input field provided.";
                     }
                     var folder = '' + scope.listname + (!path ? '' : '/' + path);
-                    var getBufferAsync = instance._getFileBufferAsync($sourceInput[0].files[0]);
+                    var getBufferAsync = instance.sp._getFileBufferAsync($sourceInput[0].files[0]);
                     getBufferAsync.done(function (arrayBuffer) {
-                        var addFile = instance._addFileToFolderAsync($sourceInput[0].value, folder, arrayBuffer);
+                        var addFile = instance.sp._addFileToFolderAsync($sourceInput[0].value, folder, arrayBuffer);
                         addFile.done(function (item, status, xhr) {
                             var uri = item.d.ListItemAllFields.__deferred.uri + '';
-                            var getItemAsync = instance.item().getByUrlAsync(uri);
+                            var getItemAsync = instance.sp.item().getByUrlAsync(uri);
                             getItemAsync.done(function (data) {
                                 dfd.resolve(data, uri);
                             });
@@ -863,8 +870,93 @@
             };
             return scope;
 
-        })({}, sspjs.sp.$1, sspjs.sp);
-    }
+        })({}, sspjs.sp.$1, sspjs);
+    },
+    user: (function(id){
+        return (function (scope, context, instance) {
+            scope = {
+                _default: {
+                    plain: false,
+                    query: ''
+                },
+                _resolve: function (data, dfd, plain, isCollection) {
+                    if (plain !== true) {
+                        if (isCollection === true) {
+                            dfd.resolve(data.d.results)
+                        } else {
+                            dfd.resolve(data.d);
+                        }
+                    } else {
+                        dfd.resolve(data);
+                    }
+                    return dfd;
+                },
+                id: id,
+                getAsync: function (options) {
+                    var dfd = new $.Deferred();
+                    options = $.extend(scope._default, options);
+
+                    var CACHE_KEY = '_ODATA_USER_' + scope.id + options.query;
+                    var userFromCache = instance.cache.get(CACHE_KEY);
+                    if (userFromCache) {
+                        dfd.resolve(userFromCache);
+                        return dfd.promise();
+                    }
+
+                    var url = context.getApiUrl() + 'web/GetUserById(' + scope.id + ')?' + options.query;
+                    if (!scope.id)
+                        url = context.getApiUrl() + 'web/currentUser?' + options.query;
+                    context.ajax(url, function (data) {
+                        scope._resolve(data, dfd, options.plain);
+                    }, dfd.reject);
+                    return dfd.promise();
+                }
+            };
+
+            // remove this with "scope" if more methods are present
+            return scope.getAsync();
+        })({}, sspjs.sp.$1, sspjs);
+    }),
+    users: (function () {
+        return (function (scope, context, instance) {
+            scope = {
+                _default: {
+                    plain: false,
+                    query: ''
+                },
+                _resolve: function (data, dfd, plain, isCollection) {
+                    if (plain !== true) {
+                        if (isCollection === true) {
+                            dfd.resolve(data.d.results)
+                        } else {
+                            dfd.resolve(data.d);
+                        }
+                    } else {
+                        dfd.resolve(data);
+                    }
+                    return dfd;
+                },
+                allAsync: function (options) {
+                    var dfd = new $.Deferred();
+                    options = $.extend(scope._default, options);
+
+                    var CACHE_KEY = '_ODATA_USERS_' + options.query;
+                    var usersFromCache = instance.cache.get(CACHE_KEY);
+                    if (usersFromCache) {
+                        dfd.resolve(usersFromCache);
+                        return dfd.promise();
+                    }
+
+                    var url = context.getApiUrl() + 'web/SiteUsers?' + options.query;
+                    context.ajax(url, function (data) {
+                        scope._resolve(data, dfd, options.plain, true);
+                    }, dfd.reject);
+                    return dfd.promise();
+                }
+            };
+            return scope.allAsync();
+        })({}, sspjs.sp.$1, sspjs);
+    })
 },
         resources : {
     default: {},
@@ -918,7 +1010,10 @@
     layoutsUrl: '_layouts/15/',
     imagesPath: '',
     language: 'en-US',
-    languageUI: 'en-US'
+    languageUI: 'en-US',
+    fileName: '',
+    pathName: '',
+    isDialog: false
 },
         cache : {
     _setCookie: function (key, value) {
@@ -1050,6 +1145,58 @@
     },
     close: function (returnValue) {
         window.frameElement.commitPopup(returnValue);
+    }
+},
+        url : {
+    queryString: function (key) {
+        if (!JSRequest)
+            return null;
+
+        JSRequest.EnsureSetup();
+        return JSRequest.QueryString[key];
+    },
+    getParameter: function (key, url) {
+        if (!GetUrlKeyValue)
+            return null;
+        if (!url)
+            return GetUrlKeyValue(key);
+        return GetUrlKeyValue(key, false, url);
+    },
+    escape: function (text) {
+        if (!escapeProperly)
+            return text;
+        return escapeProperly(text);
+    },
+    unescape: function (text) {
+        if (!unescapeProperly)
+            return text;
+        return unescapeProperly(text);
+    }
+},
+        common : {
+    loginAsAnotherUser: function () {
+        LoginAsAnother('\u002f_layouts\u002fAccessDenied.aspx?loginasanotheruser=true', 0);
+    },
+    encodeHtml: function (html) {
+        if (!STSHtmlEncode)
+            return html;
+        return STSHtmlEncode(html);
+    },
+    decodeHtml: function (text) {
+        if (!STSHtmlDecode)
+            return text;
+        return STSHtmlDecode(text);
+    },
+    createGUID: function () {
+        if (SP && SP.Guid && SP.Guid.newGuid)
+            return SP.Guid.newGuid().toString();
+
+        function s4() {
+            return Math.floor((1 + Math.random()) * 0x10000)
+              .toString(16)
+              .substring(1);
+        }
+        return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
     }
 },
         _hash: function (value) {

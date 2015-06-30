@@ -1,13 +1,13 @@
 <!-- This file can be included in a Content Editor WebPart -->
 <!-- import files from document library -->
 <script type="text/javascript" src="/sites/0001/Shared Documents/jquery-2.1.4.min.js"></script>
-<script type="text/javascript" src="/sites/0001/Shared Documents/sspjs-1.1.4.js"></script>
+<script type="text/javascript" src="/sites/0001/Shared Documents/sspjs-1.1.6.js"></script>
 <script type="text/javascript">
     /// <reference path="jquery-2.1.4.min.js" />
-    /// <reference path="sspjs-1.1.4.js" />
+    /// <reference path="sspjs-1.1.6.js" />
 
     var $scope = {};
-    $sspjs(function ($sp, $logger) {
+    $sspjs(function ($sp, $logger, $notify, $dialog) {
 
         // Overwrite default logging method to
         // send the output to the DOM not to the browsers console
@@ -34,10 +34,10 @@
                                     var id = $(this).data('id');
                                     var deleteAsync = listActions.deleteAsync(id);
                                     deleteAsync.done(function () {
-                                        $sp.addStatus({ title: 'Deleted', message: id });
+                                        $notify.addStatus({ title: 'Deleted', message: id });
                                     });
                                     deleteAsync.fail(function () {
-                                        $sp.addStatus({ title: 'Failed', color: 'red', message: id });
+                                        $notify.addStatus({ title: 'Failed', color: 'red', message: id });
                                     });
                                 })))
                     .attr("data-id", items[i].Id));
@@ -53,7 +53,7 @@
 
         $('#addFileButton').on('click', function () {
 
-            $sp.notify('Uploading...');
+            $notify.show('Uploading...');
 
             var newFileName = $('#displayName').val();
             var $input = $('#getFile');
@@ -63,7 +63,7 @@
 
                 var updateAsync = listActions.updateAsync(item.Id, { Title: newFileName });
                 updateAsync.done(function (item) {
-                    $sp.addStatus({ title: 'Upload complete', message: newFileName });
+                    $notify.addStatus({ title: 'Upload complete', message: newFileName });
                 });
                 updateAsync.fail(function (sender, message, args) {
                     $logger.log(message);
@@ -76,44 +76,52 @@
 
         $scope.lastId = null;
         $('#addStatusBtn').on('click', function () {
-            $sp.notify('Adding status');
-            $scope.lastId = $sp.addStatus({ title: 'Added', message: $('#statusText').val(), color: 'green' });
+            $notify.show('Adding status');
+            $scope.lastId = $notify.addStatus({ title: 'Added', message: $('#statusText').val(), color: 'green' });
         });
 
         $('#removeLastBtn').on('click', function () {
-            $sp.notify('Removing status');
-            $sp.removeStatus($scope.lastId);
+            $notify.show('Removing status');
+            $notify.removeStatus($scope.lastId);
         });
 
         $('#removeAllBtn').on('click', function () {
-            $sp.notify('Removing all status');
-            $sp.removeAllStatus();
+            $notify.show('Removing all status');
+            $notify.removeAllStatus();
         });
 
-        $('#displayHistoryBtn').on('click', function () {
-            $sp.notify('Loading history...');
-
-            var id = $('#fileList option:selected').val();
-            var getFileUrl = $sp.getFileUrlAsync('Documents', id);
-            getFileUrl.done(function (url) {
-                var getHistory = $sp.getFileHistoryAsync('Documents', url);
-                getHistory.done(function (versions) {
-                    $('#fileHistoryList').empty();
-                    for (var i = 0; i < versions.length; i++) {
-                        $('#fileHistoryList')
-                            .append($("<option></option>")
-                            .attr("value", versions[i].get_id())
-                            .text(versions[i].get_versionLabel() + ' (' + versions[i].get_size() + ')'));
-                    }
-                });
-                getHistory.fail(function (sender, message, args) {
-                    $logger.log(message);
-                });
-            });
-            getFileUrl.fail(function (sender, message, args) {
-                $logger.log(message);
+        $('#openDlg').on('click', function () {
+            $dialog.open($('#dlgUrl').val()).done(function (result) {
+                alert('closed ok!');
+            }).fail(function (result) {
+                alert('closed cancel!');
             });
         });
+
+        $('#loadUserBtn').on('click', function () {
+            var id = $('#userIdTxt').val();
+
+            $sp.user(id).done(function (user) {
+                $('#usrTxt').val(user.LoginName);
+            }).fail(function (a, b, c) {
+                $('#usrTxt').val('No user with id:' + id);
+            });
+        });
+
+        $('#loadUsersBtn').on('click', function () {
+            $sp.users().done(function (users) {
+
+                for (var i = 0; i < users.length; i++) {
+                    $('#usersList')
+                        .append($("<tr></tr>")
+                            .append($('<td></td>')
+                                .text(users[i].Id))
+                            .append($('<td></td>')
+                                .text(users[i].Title)));
+                }
+            });
+        });
+
     });
 </script>
 
@@ -130,6 +138,13 @@
 </fieldset>
 <br />
 
+<h2>Dialog</h2>
+<fieldset>
+    <input id="dlgUrl" type="text" value="https://github.com/jsHelper/simple-sharepoint.js" />
+    <input id="openDlg" type="button" value="Open" />
+</fieldset>
+<br />
+
 <h2>Notifications</h2>
 <fieldset>
     <input id="statusText" type="text" />
@@ -139,12 +154,17 @@
 </fieldset>
 <br />
 
-<h2>Version history</h2>
+<h2>User</h2>
 <fieldset>
-    <select id="fileList"></select>
-    <input id="displayHistoryBtn" type="button" value="Load History" />
-    <select id="fileHistoryList"></select>
+    <input id="userIdTxt" type="text" value="" />
+    <input id="loadUserBtn" type="button" value="Load" />
+    <input id="usrTxt" type="text" value="Loading..." />
 </fieldset>
+<br />
+
+<h2>Users</h2>
+<input id="loadUsersBtn" type="button" value="Load" />
+<table id="usersList"></table>
 <br />
 
 <h2>Output</h2>
