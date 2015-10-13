@@ -127,9 +127,11 @@
           },
           add: function(options){
             // tbd.
+            throw "Not implemented yet"
           },
           delete: function(options){
             // tbd.
+            throw "Not implemented yet"
           }
         };
         return $scope.get();
@@ -224,7 +226,7 @@
                   });
                 };
               },
-              delete: function(id){
+              delete: function(){
                 var dfd = new $jq.Deferred();
                 var getItemAsync = $item_scope.get({plain: true});
                 getItemAsync.done(function (data) {
