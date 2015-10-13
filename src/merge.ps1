@@ -1,5 +1,5 @@
 ﻿
-$version = "1.1.6"
+$version = "2.0.0-beta"
 $sourceFile = "sspjs.js"
 $targetFile = "..\dist\sspjs-$version.js"
 
@@ -22,3 +22,4 @@ $result = $content
 
 sc $targetFile $result
 Write-Host "write target: '$targetFile'"  -fore green
+$targetFile

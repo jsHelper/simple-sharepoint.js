@@ -2,7 +2,7 @@
     open: function (url) {
 
         if (!SP || !SP.UI || !SP.UI.DialogResult)
-            throw "No SP dialog objects found";
+            throw new Exception('SP (SP.UI.DialogResult) object not defined');
 
         var dfd = new $.Deferred();
         var options = SP.UI.$create_DialogOptions();

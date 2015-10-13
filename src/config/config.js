@@ -11,5 +11,8 @@
     languageUI: 'en-US',
     fileName: '',
     pathName: '',
-    isDialog: false
+    isDialog: false,
+    spHostUrl: '',
+    appHostUrl: '',
+    isApp: false
 }
